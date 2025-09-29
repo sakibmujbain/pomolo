@@ -1,0 +1,49 @@
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical {
+    -fx-background-color: transparent;   /* background of the track */
+    -fx-pref-width: 8px;                 /* make it thinner */
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #888;          /* scrollbar handle */
+    -fx-background-radius: 4px;
+}
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #555;          /* darker on hover */
+}
+
+.scroll-bar:horizontal {
+    -fx-opacity: 0; /* completely hide horizontal bar if you don’t need it */
+}
+
+/* Top bar style */
+#topbar {
+    -fx-border-color: white;
+    -fx-border-width: 2;
+}
+
+/* Base style for the row HBox */
+.row-box {
+    -fx-background-color: transparent;
+    -fx-border-color: white;
+    -fx-border-width: 1 2 1 2;
+    -fx-padding: 10;
+    -fx-cursor: hand;   /* cursor changes like a button */
+}
+
+/* Hover state */
+.row-box:hover {
+    -fx-background-color: white;  /* background turns white */
+}
+
+.row-box:hover Text {
+    -fx-fill: black; /* change to white */
+}
