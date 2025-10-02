@@ -22,6 +22,7 @@ public class SongManager {
         }
     }
 
+    // Reads the file information and returns SongInfo
     public static SongInfo readMp3(File mp3){
         String fileName = mp3.getName();
         String path = mp3.getAbsolutePath();
@@ -60,5 +61,6 @@ public class SongManager {
         System.out.println("path: " + info.path);
         System.out.println("artist: " + info.artist);
         System.out.println("duration: " + info.duration);
+        SqliteDBManager.insertNewSong(info);
     }
 }
