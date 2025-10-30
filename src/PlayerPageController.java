@@ -1,5 +1,3 @@
-// Save as: src/PlayerPageController.java (OVERWRITE)
-
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -28,22 +26,20 @@ public class PlayerPageController {
     private void initialize() {
         playerManager = MusicPlayerManager.getInstance();
         bindControls();
+        Main.getRootController().hidePlayerBar();
     }
 
     private void bindControls() {
-        // Bind Play/Pause button text
         playPauseButton.textProperty().bind(
                 Bindings.when(playerManager.isPlayingProperty())
                         .then("Pause")
                         .otherwise("Play")
         );
 
-        // Bind Current Song text
         currentSongText.textProperty().bind(
                 Bindings.createStringBinding(() -> {
                     SongManager.SongInfo song = playerManager.currentSongProperty().get();
                     if (song != null) {
-                        // Truncate if too long for the UI
                         String name = song.fileName;
                         if (name.length() > 40) {
                             name = name.substring(0, 37) + "...";
@@ -54,10 +50,8 @@ public class PlayerPageController {
                 }, playerManager.currentSongProperty())
         );
 
-        // Bind Volume Slider
         volumeSlider.valueProperty().bindBidirectional(playerManager.volumeProperty());
 
-        // Bind Progress Slider and Time Texts
         playerManager.currentTimeProperty().addListener((obs, oldTime, newTime) -> {
             if (!isSliderBeingDragged && playerManager.totalDurationProperty().get() != null) {
                 Duration total = playerManager.totalDurationProperty().get();
@@ -76,7 +70,6 @@ public class PlayerPageController {
             }
         });
 
-        // Add listeners for seeking with the progress slider
         progressSlider.setOnMousePressed(e -> isSliderBeingDragged = true);
         progressSlider.setOnMouseReleased(e -> {
             if (playerManager.totalDurationProperty().get() != null) {
@@ -89,33 +82,18 @@ public class PlayerPageController {
         });
     }
 
-    // --- Button Handlers ---
-    @FXML
-    private void handlePlayPause() {
-        playerManager.playPause();
-    }
-    @FXML
-    private void handleNext() {
-        playerManager.next();
-    }
-    @FXML
-    private void handlePrevious() {
-        playerManager.previous();
-    }
+    @FXML private void handlePlayPause() { playerManager.playPause(); }
+    @FXML private void handleNext() { playerManager.next(); }
+    @FXML private void handlePrevious() { playerManager.previous(); }
 
-    // --- Navigation ---
     @FXML
     public void goToHome(ActionEvent e) throws Exception {
-        // Reload home page
-        Parent home = FXMLLoader.load(getClass().getResource("home.fxml"));
+        Main.getRootController().showPlayerBar();
+        // --- MODIFIED: Use Main.class ---
+        Parent home = FXMLLoader.load(Main.class.getResource("/home.fxml"));
         Main.getRootController().setPage(home);
     }
 
-    /**
-     * Formats a Duration object to a simple M:S string.
-     * @param duration The Duration object
-     * @return Formatted string (e.g., "02:03")
-     */
     private String formatDurationSimple(Duration duration) {
         if (duration == null || duration.isUnknown()) return "00:00";
         long seconds = (long) duration.toSeconds();

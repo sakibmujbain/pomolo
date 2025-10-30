@@ -1,12 +1,12 @@
-// Save as: src/RootPageController.java (OVERWRITE)
-
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
@@ -15,15 +15,15 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class RootPageController {
-    // FXML fields from RootPage.fxml
+    @FXML private BorderPane rootBorderPane;
     @FXML private StackPane root;
     @FXML private ImageView backgroundImage;
+    @FXML private Node playerBar;
 
     UserProperties up = new UserProperties();
 
     @FXML
     private void initialize() {
-        // Initialization for Root Page
         try {
             Properties settings = up.loadProperties();
             String imagePath = settings.getProperty("background");
@@ -38,9 +38,9 @@ public class RootPageController {
             } else {
                 showError("Image Error", "Could not load background image: " + imagePath);
             }
-            // Load the home page by default
-            Parent home = FXMLLoader.load(getClass().getResource("home.fxml"));
-            // Add home page on top of the background image
+
+            // --- MODIFIED: Use Main.class instead of getClass() ---
+            Parent home = FXMLLoader.load(Main.class.getResource("/home.fxml"));
             root.getChildren().add(home);
 
         } catch (Exception e) {
@@ -49,11 +49,9 @@ public class RootPageController {
         }
     }
 
-    // Page Navigation
     public void setPage(Parent node) {
-        // Find the current page (if it exists) to fade it out
         Parent currentPage = null;
-        if (root.getChildren().size() > 1) { // 0 is background, 1 is current page
+        if (root.getChildren().size() > 1) {
             currentPage = (Parent) root.getChildren().get(1);
         }
 
@@ -62,9 +60,8 @@ public class RootPageController {
             fadeout.setFromValue(1.0);
             fadeout.setToValue(0.0);
             fadeout.setOnFinished(e -> {
-                // After fade out, add new page and fade it in
-                root.getChildren().setAll(backgroundImage, node); // Add new node on top of background
-                node.setOpacity(0.0); // Start new node as transparent
+                root.getChildren().setAll(backgroundImage, node);
+                node.setOpacity(0.0);
                 FadeTransition fadeIn = new FadeTransition(Duration.millis(200), node);
                 fadeIn.setFromValue(0.0);
                 fadeIn.setToValue(1.0);
@@ -72,7 +69,6 @@ public class RootPageController {
             });
             fadeout.play();
         } else {
-            // No current page, just add the new one and fade it in
             root.getChildren().setAll(backgroundImage, node);
             node.setOpacity(0.0);
             FadeTransition fadeIn = new FadeTransition(Duration.millis(200), node);
@@ -82,7 +78,6 @@ public class RootPageController {
         }
     }
 
-    // Background Image Control
     public void SetBackgroundImage(String path) {
         try {
             File imgFile = new File(path);
@@ -96,12 +91,25 @@ public class RootPageController {
         }
     }
 
-    // Utility Method
     public void showError(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    public void hidePlayerBar() {
+        playerBar.setVisible(false);
+        playerBar.setManaged(false);
+    }
+
+    public void showPlayerBar() {
+        playerBar.setVisible(true);
+        playerBar.setManaged(true);
+    }
+
+    public StackPane getPageContainer() {
+        return root;
     }
 }

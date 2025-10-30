@@ -1,5 +1,3 @@
-// Save as: src/HomeController.java (OVERWRITE)
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,30 +23,25 @@ public class HomeController {
     private MusicPlayerManager playerManager;
     private List<SongManager.SongInfo> loadedSongs;
 
-    //Initialize
     @FXML
     private void initialize(){
-        // Get the single instance of the player manager
+        // --- THIS LINE IS REMOVED ---
+        // Main.getRootController().showPlayerBar();
+        // --- END REMOVAL ---
+
         playerManager = MusicPlayerManager.getInstance();
-
-        // Load songs and add them to the VBox
         loadSongs();
-
-        // Pass the loaded song list to the player manager
         if (loadedSongs != null) {
             playerManager.setQueue(loadedSongs);
         }
     }
 
-    //Go to settings
     @FXML
     public void goToSettings(ActionEvent e) throws Exception{
-        Parent settings = FXMLLoader.load(getClass().getResource("settings.fxml"));
+        Parent settings = FXMLLoader.load(Main.class.getResource("/settings.fxml"));
         Main.getRootController().setPage(settings);
-
     }
 
-    // Add new music
     @FXML
     private void AddNewMusic(){
         FileChooser fileChooser = new FileChooser();
@@ -56,28 +49,21 @@ public class HomeController {
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Music Files", "*.mp3", "*.wav", "*.flac")
         );
-
         Stage stage = (Stage) rootPane.getScene().getWindow();
-
         File file = fileChooser.showOpenDialog(stage);
         if(file != null){
             SongManager.SongInfo music = SongManager.readMp3(file);
             SqliteDBManager.insertNewSong(music);
-
-            // Reload songs from DB
             loadSongs();
-            // Update the player manager's queue
             if (loadedSongs != null) {
                 playerManager.setQueue(loadedSongs);
             }
         }
     }
 
-    // Load Songs and add them to the Vbox
     public void loadSongs(){
         loadedSongs = SqliteDBManager.getAllSongs();
-        vbox.getChildren().clear(); // reset
-
+        vbox.getChildren().clear();
         int index = 0;
         for(SongManager.SongInfo s : loadedSongs){
             vbox.getChildren().add(createSongRow(s, index));
@@ -85,36 +71,27 @@ public class HomeController {
         }
     }
 
-    // Create a hbox (music row)
     public HBox createSongRow(SongManager.SongInfo song, int index){
         HBox songRow = new HBox();
         songRow.setPrefHeight(40.0);
         songRow.setMaxWidth(Double.MAX_VALUE);
         songRow.getStyleClass().add("row-box");
 
-        // --- THIS IS THE KEY CHANGE ---
-        // On click, play the song AND navigate to the player page
         songRow.setOnMouseClicked(e -> {
             try {
-                // 1. Tell the manager to play the song
                 playerManager.playSong(index);
-
-                // 2. Load and navigate to the player page
-                Parent playerPage = FXMLLoader.load(getClass().getResource("PlayerPage.fxml"));
+                Parent playerPage = FXMLLoader.load(Main.class.getResource("/PlayerPage.fxml"));
                 Main.getRootController().setPage(playerPage);
-
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
         });
-
 
         GridPane grid = new GridPane();
         grid.setMaxWidth(Double.MAX_VALUE);
         grid.setPrefHeight(30.0);
         grid.setPadding(new Insets(0, 10, 0, 10));
 
-        // Columns in Grid
         ColumnConstraints col1 = new ColumnConstraints();
         col1.setHalignment(HPos.LEFT);
         col1.setPercentWidth(33.33);
@@ -131,7 +108,6 @@ public class HomeController {
         col3.setHgrow(Priority.ALWAYS);
         grid.getColumnConstraints().addAll(col1, col2, col3);
 
-        // Text: file name
         String fileName = song.fileName;
         if(fileName.length() > 30){
             fileName = fileName.substring(0, 27) + "...";
@@ -140,12 +116,10 @@ public class HomeController {
         titleText.setFill(Color.WHITE);
         titleText.setFont(Font.font("Monospaced", 13));
 
-        // Text: artist name
         Text artistText = new Text(song.artist);
         artistText.setFill(Color.WHITE);
         artistText.setFont(Font.font("Monospaced", 13));
 
-        // Text: duration
         Text durationText = new Text(formatDuration(song.duration));
         durationText.setFill(Color.WHITE);
         durationText.setFont(Font.font("Monospaced", 13));

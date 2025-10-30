@@ -1,5 +1,3 @@
-// Save as: src/SettingsController.java (OVERWRITE)
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,6 +20,10 @@ public class SettingsController {
 
     @FXML
     private void initialize(){
+        // --- THIS LINE IS REMOVED ---
+        // Main.getRootController().showPlayerBar();
+        // --- END REMOVAL ---
+
         try {
             Properties settings = up.loadProperties();
             String imagePath = settings.getProperty("background");
@@ -63,7 +65,7 @@ public class SettingsController {
     @FXML
     public void goToHome(ActionEvent e) {
         try {
-            Parent home = FXMLLoader.load(getClass().getResource("home.fxml"));
+            Parent home = FXMLLoader.load(Main.class.getResource("/home.fxml"));
             Main.getRootController().setPage(home);
         } catch (IOException ioException) {
             showError("Navigation Error", "Could not load home page: " + ioException.getMessage());

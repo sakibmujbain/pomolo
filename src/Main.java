@@ -1,5 +1,3 @@
-// Save as: src/Main.java (OVERWRITE)
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,13 +13,15 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception{
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("rootPage.fxml"));
+        // --- MODIFIED: Use Main.class ---
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource("/rootPage.fxml"));
         Parent root = loader.load();
 
         rootController = loader.getController();
 
-        Scene scene = new Scene(root, 960, 540);
-        scene.getStylesheets().add(getClass().getResource("home.css").toExternalForm());
+        Scene scene = new Scene(root, 960, 600);
+        // --- MODIFIED: Use Main.class ---
+        scene.getStylesheets().add(Main.class.getResource("/home.css").toExternalForm());
         stage.setTitle("Lofi Music Player");
 
         stage.setResizable(false);
@@ -30,17 +30,12 @@ public class Main extends Application {
         stage.show();
     }
 
-    /**
-     * Override the stop method to shut down the music player.
-     * This is crucial for releasing media resources.
-     */
     @Override
     public void stop() throws Exception {
         MusicPlayerManager.getInstance().shutdown();
         super.stop();
     }
 
-    // Easy access to RootController from all pages
     public static RootPageController getRootController(){
         return rootController;
     }
