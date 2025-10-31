@@ -30,8 +30,6 @@ public class PlayerBarController {
         playerManager = MusicPlayerManager.getInstance();
         bindControls();
 
-        currentSongText.setOnMouseClicked(e -> goToPlayerPage());
-
         progressSlider.setOnMousePressed(e -> isSliderBeingDragged = true);
         progressSlider.setOnMouseReleased(e -> {
             if (playerManager.totalDurationProperty().get() != null) {
@@ -89,21 +87,6 @@ public class PlayerBarController {
     @FXML private void handlePlayPause() { playerManager.playPause(); }
     @FXML private void handleNext() { playerManager.next(); }
     @FXML private void handlePrevious() { playerManager.previous(); }
-
-    @FXML
-    private void goToPlayerPage() {
-        try {
-            // --- MODIFIED: The page container only has ONE child (index 0) ---
-            Parent currentPage = (Parent) Main.getRootController().getPageContainer().getChildren().get(0);
-            if (currentPage.getUserData() != null && currentPage.getUserData().equals("playerPage")) {
-                return;
-            }
-            Parent playerPage = FXMLLoader.load(Main.class.getResource("/PlayerPage.fxml"));
-            Main.getRootController().setPage(playerPage);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private String formatDurationSimple(Duration duration) {
         if (duration == null || duration.isUnknown()) return "00:00";

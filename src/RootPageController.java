@@ -1,5 +1,3 @@
-// Save as: src/RootPageController.java (OVERWRITE)
-
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -8,7 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox; // Import HBox
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
@@ -20,16 +18,18 @@ public class RootPageController {
 
     @FXML private StackPane root;
     @FXML private ImageView backgroundImage;
-
-    // --- THESE WERE MISSING FROM YOUR FILE ---
     @FXML private StackPane pageContainer;
-    @FXML private HBox playerBar; // This must be HBox to match PlayerBar.fxml
-    // --- END ---
+    @FXML private HBox playerBar;
 
     UserProperties up = new UserProperties();
 
     @FXML
     private void initialize() {
+        // --- THIS IS THE FIX ---
+        // 1. Make the root invisible, so it can be faded in later.
+        root.setOpacity(0.0);
+        // --- END FIX ---
+
         try {
             Properties settings = up.loadProperties();
             String imagePath = settings.getProperty("background");
@@ -45,9 +45,13 @@ public class RootPageController {
                 showError("Image Error", "Could not load background image: " + imagePath);
             }
 
-            // Load the home page into the pageContainer
+            // Load the home page
             Parent home = FXMLLoader.load(Main.class.getResource("/home.fxml"));
-            pageContainer.getChildren().add(home); // Load into the container
+
+            // 2. Add the home page (it will be invisible as it's part of 'root')
+            pageContainer.getChildren().add(home);
+
+            // 3. --- REMOVED FADE-IN LOGIC FROM HERE ---
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -55,7 +59,7 @@ public class RootPageController {
         }
     }
 
-    // Page Navigation (swaps content in 'pageContainer')
+    // Page Navigation (This part is for page-to-page and is correct)
     public void setPage(Parent node) {
         Parent currentPage = null;
         if (pageContainer.getChildren().size() > 0) {
@@ -63,22 +67,22 @@ public class RootPageController {
         }
 
         if (currentPage != null) {
-            FadeTransition fadeout = new FadeTransition(Duration.millis(200), currentPage);
+            FadeTransition fadeout = new FadeTransition(Duration.millis(300), currentPage);
             fadeout.setFromValue(1.0);
             fadeout.setToValue(0.0);
             fadeout.setOnFinished(e -> {
-                pageContainer.getChildren().setAll(node); // Set in container
+                pageContainer.getChildren().setAll(node);
                 node.setOpacity(0.0);
-                FadeTransition fadeIn = new FadeTransition(Duration.millis(200), node);
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(300), node);
                 fadeIn.setFromValue(0.0);
                 fadeIn.setToValue(1.0);
                 fadeIn.play();
             });
             fadeout.play();
         } else {
-            pageContainer.getChildren().setAll(node); // Set in container
+            pageContainer.getChildren().setAll(node);
             node.setOpacity(0.0);
-            FadeTransition fadeIn = new FadeTransition(Duration.millis(200), node);
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(300), node);
             fadeIn.setFromValue(0.0);
             fadeIn.setToValue(1.0);
             fadeIn.play();
@@ -94,6 +98,7 @@ public class RootPageController {
                 showError("Image Error", "Could not find the selected image file: " + path);
             }
         } catch (Exception e) {
+            // --- FIXING TYPO: Removed stray "D" ---
             showError("Image Error", "An error occurred while setting the background image: " + e.getMessage());
         }
     }
@@ -106,7 +111,6 @@ public class RootPageController {
         alert.showAndWait();
     }
 
-    // --- Safety checks are still included ---
     public void hidePlayerBar() {
         if (playerBar != null) {
             playerBar.setVisible(false);

@@ -78,13 +78,7 @@ public class HomeController {
         songRow.getStyleClass().add("row-box");
 
         songRow.setOnMouseClicked(e -> {
-            try {
-                playerManager.playSong(index);
-                Parent playerPage = FXMLLoader.load(Main.class.getResource("/PlayerPage.fxml"));
-                Main.getRootController().setPage(playerPage);
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
+            playerManager.playSong(index);
         });
 
         GridPane grid = new GridPane();
