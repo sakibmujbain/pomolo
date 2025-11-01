@@ -101,6 +101,40 @@ public class SqliteDBManager {
         }
     }
 
+    public static void deletePlaylist(String name) {
+        String sql = "DELETE FROM playlists WHERE name = ?";
+        String sql2 = "DELETE FROM playlist_songs WHERE playlist_id = (SELECT id FROM playlists WHERE name = ?)";
+        try (Connection conn = connectPlaylist()) {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, name);
+            pstmt.executeUpdate();
+
+            PreparedStatement pstmt2 = conn.prepareStatement(sql2);
+            pstmt2.setString(1, name);
+            pstmt2.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error deleting playlist: " + e.getMessage());
+        }
+    }
+
+    public static void removeSongFromPlaylist(SongManager.SongInfo song, String playlistName) {
+        String sql = """
+            DELETE FROM playlist_songs
+            WHERE playlist_id = (SELECT id FROM playlists WHERE name = ?)
+            AND song_id = (SELECT id FROM songs_db.songs WHERE path = ?)
+        """;
+        try (Connection conn = connectPlaylist()) {
+            Statement stmt = conn.createStatement();
+            stmt.execute("ATTACH DATABASE '" + SONGS_DB_PATH + "' AS songs_db");
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, playlistName);
+            pstmt.setString(2, song.path);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error removing song from playlist: " + e.getMessage());
+        }
+    }
+
     public static boolean songExists(String path) {
         String sql = "SELECT 1 FROM songs WHERE path = ?";
         try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {

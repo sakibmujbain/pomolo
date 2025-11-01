@@ -3,6 +3,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -13,6 +16,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public class PlaylistSongsPageController {
 
@@ -80,19 +84,24 @@ public class PlaylistSongsPageController {
 
         ColumnConstraints col1 = new ColumnConstraints();
         col1.setHalignment(HPos.LEFT);
-        col1.setPercentWidth(33.33);
+        col1.setPercentWidth(40.0);
         col1.setHgrow(Priority.ALWAYS);
 
         ColumnConstraints col2 = new ColumnConstraints();
         col2.setHalignment(HPos.CENTER);
-        col2.setPercentWidth(33.33);
+        col2.setPercentWidth(20.0);
         col2.setHgrow(Priority.ALWAYS);
 
         ColumnConstraints col3 = new ColumnConstraints();
-        col3.setHalignment(HPos.RIGHT);
-        col3.setPercentWidth(33.33);
+        col3.setHalignment(HPos.CENTER);
+        col3.setPercentWidth(20.0);
         col3.setHgrow(Priority.ALWAYS);
-        grid.getColumnConstraints().addAll(col1, col2, col3);
+
+        ColumnConstraints col4 = new ColumnConstraints();
+        col4.setHalignment(HPos.RIGHT);
+        col4.setPercentWidth(20.0);
+        col4.setHgrow(Priority.ALWAYS);
+        grid.getColumnConstraints().addAll(col1, col2, col3, col4);
 
         String fileName = song.fileName;
         if (fileName.length() > 30) {
@@ -110,9 +119,24 @@ public class PlaylistSongsPageController {
         durationText.setFill(Color.WHITE);
         durationText.setFont(Font.font("Monospaced", 13));
 
+        Button deleteButton = new Button("Delete");
+        deleteButton.setOnAction(e -> {
+            e.consume(); // Prevent the row's onMouseClicked from firing
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Remove Song");
+            alert.setHeaderText("Are you sure you want to remove the song: " + song.fileName + " from this playlist?");
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK){
+                SqliteDBManager.removeSongFromPlaylist(song, playlistName);
+                loadSongs();
+            }
+        });
+
         grid.add(titleText, 0, 0);
         grid.add(artistText, 1, 0);
         grid.add(durationText, 2, 0);
+        grid.add(deleteButton, 3, 0);
 
         songRow.getChildren().add(grid);
         HBox.setHgrow(grid, Priority.ALWAYS);
