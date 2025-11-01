@@ -1,14 +1,11 @@
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
+import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-
-import java.io.IOException;
 
 public class PlayerBarController {
 
@@ -16,6 +13,7 @@ public class PlayerBarController {
     @FXML private Button prevButton;
     @FXML private Button playPauseButton;
     @FXML private Button nextButton;
+    @FXML private SVGPath playPauseIcon;
     @FXML private Text currentSongText;
     @FXML private Text currentTimeText;
     @FXML private Text totalTimeText;
@@ -24,6 +22,9 @@ public class PlayerBarController {
 
     private MusicPlayerManager playerManager;
     private boolean isSliderBeingDragged = false;
+
+    private static final String PLAY_ICON = "M6 4l8 6-8 6z";
+    private static final String PAUSE_ICON = "M6 4h4v12H6zm8 0h4v12h-4z";
 
     @FXML
     private void initialize() {
@@ -43,11 +44,13 @@ public class PlayerBarController {
     }
 
     private void bindControls() {
-        playPauseButton.textProperty().bind(
-                Bindings.when(playerManager.isPlayingProperty())
-                        .then("Pause")
-                        .otherwise("Play")
-        );
+        playerManager.isPlayingProperty().addListener((obs, wasPlaying, isNowPlaying) -> {
+            if (isNowPlaying) {
+                playPauseIcon.setContent(PAUSE_ICON);
+            } else {
+                playPauseIcon.setContent(PLAY_ICON);
+            }
+        });
 
         currentSongText.textProperty().bind(
                 Bindings.createStringBinding(() -> {

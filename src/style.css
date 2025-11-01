@@ -17,3 +17,17 @@
 .button:pressed {
     -fx-background-color: rgba(255, 255, 255, 0.5);
 }
+
+.player-bar-button {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-background-radius: 50%;
+}
+
+.player-bar-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+.player-bar-button:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.4);
+}
