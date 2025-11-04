@@ -1,0 +1,159 @@
+/* Save as: src/home.css (OVERWRITE) */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #888;
+    -fx-background-radius: 4px;
+}
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #555;
+}
+.scroll-bar:horizontal {
+    -fx-opacity: 0;
+}
+
+.top-bar {
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-border-color: white;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.custom-title-bar {
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+}
+
+.window-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.window-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ---
+--- CONSOLIDATED SONG ROW STYLES
+--- */
+
+.row-box {
+    -fx-background-color: transparent;
+    -fx-border-color: white;
+    -fx-border-width: 1 2 1 2;
+    -fx-padding: 10;
+    -fx-cursor: hand;
+}
+
+/* --- THIS IS THE HIGH-CONTRAST HOVER --- */
+.row-box:hover {
+    -fx-background-color: white; /* Solid white background */
+}
+
+.row-box:hover Text {
+    -fx-fill: black; /* Makes text black on hover */
+}
+
+
+/* ---
+--- PLAYER PAGE STYLES
+--- */
+
+.player-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+    -fx-text-fill: white;
+}
+.player-button:hover {
+    -fx-opacity: 0.8;
+}
+
+#album-art-placeholder {
+    -fx-fill: #222222;
+    -fx-stroke: #ffffff22;
+    -fx-stroke-width: 1px;
+    -fx-arc-width: 20px;
+    -fx-arc-height: 20px;
+}
+
+#song-title-text {
+    -fx-font-family: "System", "Helvetica Neue", "Arial";
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-fill: white;
+}
+#song-artist-text {
+    -fx-font-family: "System", "Helvetica Neue", "Arial";
+    -fx-font-size: 16px;
+    -fx-fill: #b3b3b3;
+}
+.time-label {
+    -fx-font-family: "Monospaced", "Courier New";
+    -fx-fill: #b3b3b3;
+    -fx-font-size: 12px;
+}
+
+.control-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}
+.control-button .svg-icon {
+    -fx-fill: #b3b3b3;
+}
+.control-button:hover .svg-icon {
+    -fx-fill: white;
+}
+#play-pause-button {
+    -fx-background-color: white;
+    -fx-background-radius: 50%;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.1, 0, 0);
+}
+#play-pause-button .svg-icon {
+    -fx-fill: black;
+}
+#play-pause-button:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+.control-button.active .svg-icon {
+    -fx-fill: #a481ee; /* Lofi purple accent */
+}
+
+/* --- The Track (background bar) --- */
+.slider .track {
+    -fx-background-color: white;
+    -fx-background-radius: 2;
+    -fx-pref-height: 3; /* thin bar */
+}
+
+/* --- The Thumb (the draggable circle) --- */
+.slider .thumb {
+    -fx-background-color: red;
+    -fx-background-radius: 50%;
+    -fx-pref-width: 14;
+    -fx-pref-height: 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0.5, 0, 1);
+}
+
+/* Optional hover effect for thumb */
+.slider .thumb:hover {
+    -fx-scale-x: 1.2;
+    -fx-scale-y: 1.2;
+}
+
+.bottom-rectangle {
+       -fx-background-color: linear-gradient(
+           from 0% 0% to 0% 100%,  /* vertical gradient: top to bottom */
+           rgba(0,0,0,0.3) 0%,   /* top color */
+           rgba(0,0,0,0.9) 100%   /* bottom color */
+       );
+}

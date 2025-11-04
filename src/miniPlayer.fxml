@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="miniPlayerController"
+           fx:id="root"
+           prefWidth="300" prefHeight="300"
+           style="-fx-background-color: rgba(43,43,43,0.95); -fx-background-radius: 180;">
+
+    <VBox alignment="CENTER" spacing="15">
+        <!-- Music Icon -->
+        <Label text="🎵" style="-fx-font-size: 40px;" />
+
+        <!-- Song Title -->
+        <Label fx:id="songLabel"
+               text="Now Playing"
+               style="-fx-text-fill: white; -fx-font-size: 16px;" />
+
+        <!-- Control Buttons -->
+        <HBox alignment="CENTER" spacing="15">
+            <Button text="⏮"
+                    onAction="#previous"
+                    style="-fx-font-size: 18px; -fx-background-color: #444; -fx-text-fill: white; -fx-background-radius: 50%; -fx-pref-width: 40; -fx-pref-height: 40;" />
+            <Button fx:id="playPauseButton"
+                    text="▶"
+                    onAction="#playPause"
+                    style="-fx-font-size: 22px; -fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 50%; -fx-pref-width: 50; -fx-pref-height: 50;" />
+            <Button text="⏭"
+                    onAction="#next"
+                    style="-fx-font-size: 18px; -fx-background-color: #444; -fx-text-fill: white; -fx-background-radius: 50%; -fx-pref-width: 40; -fx-pref-height: 40;" />
+        </HBox>
+
+        <!-- Restore Main Player -->
+        <Button text="⤴ Restore"
+                onAction="#restoreMain"
+                style="-fx-background-color: transparent; -fx-text-fill: lightgray; -fx-font-size: 13px;" />
+    </VBox>
+</StackPane>
