@@ -9,5 +9,6 @@
     </NATIVE>
     <SOURCES />
     <jarDirectory url="file://$PROJECT_DIR$/../../programs/javafx/openjfx-24.0.2_linux-x64_bin-sdk/javafx-sdk-24.0.2/lib" recursive="false" />
+
   </library>
 </component>

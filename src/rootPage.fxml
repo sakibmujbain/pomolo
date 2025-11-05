@@ -16,6 +16,7 @@
 
         <StackPane fx:id="pageContainer" prefHeight="289.0" prefWidth="631.0">
 
+
             <padding>
                 <!-- This padding makes space for the bars that will be layered on top -->
                 <Insets top="30.0" bottom="60.0" />

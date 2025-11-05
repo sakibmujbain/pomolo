@@ -158,6 +158,7 @@
        );
 }
 
+
 .pomodoro-button {
     /* Base style: Transparent background, white text */
     -fx-background-color: transparent;
@@ -236,4 +237,5 @@
 .icon-btn:hover .iconli-font-icon {
     -fx-icon-color: black;
 }
+
 

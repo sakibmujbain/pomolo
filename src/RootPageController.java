@@ -9,6 +9,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+
 import javafx.util.Duration;
 
 import java.io.File;
@@ -129,4 +130,9 @@ public class RootPageController {
     public StackPane getPageContainer() {
         return pageContainer;
     }
+
+    public StackPane getRootPane() {
+        return root;
+    }
+
 }

@@ -1,7 +1,12 @@
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.ToolBar;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+
 
 public class CustomTitleBarController {
 
@@ -26,10 +31,39 @@ public class CustomTitleBarController {
     }
 
     @FXML
-    private void minimize() {
-        Stage stage = (Stage) toolBar.getScene().getWindow();
-        stage.setIconified(true);
+    public void minimize() {
+        try {
+            // Hide the main window
+            Stage currentStage = (Stage) toolBar.getScene().getWindow();
+            currentStage.hide();
+
+            // Load miniPlayer.fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/miniPlayer.fxml"));
+            Parent miniRoot = loader.load();
+
+            // --- Make Scene transparent so circle shape can show cleanly ---
+            Scene miniScene = new Scene(miniRoot, 300, 300);
+            miniScene.setFill(javafx.scene.paint.Color.TRANSPARENT); // ✅ Transparent background
+
+            Stage miniStage = new Stage();
+            miniStage.setScene(miniScene);
+            miniStage.initStyle(StageStyle.TRANSPARENT); // ✅ No borders, allows custom shapes
+            miniStage.setResizable(false);
+            miniStage.setTitle("Pomolo Mini Player");
+
+            // Optional: make it always float above other windows
+            miniStage.setAlwaysOnTop(true);
+
+            // When mini window closes, restore the main window
+            miniStage.setOnCloseRequest(event -> currentStage.show());
+
+            miniStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
+
 
     @FXML
     private void close() {
