@@ -3,9 +3,11 @@ package pages.custom_title_bar;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ToolBar;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -55,6 +57,15 @@ public class CustomTitleBarController {
 
             // Optional: make it always float above other windows
             miniStage.setAlwaysOnTop(true);
+
+            // Get screen dimensions
+            Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+            //Calculate X and Y position
+            double x = screenBounds.getMaxX() - 300;
+            double y = screenBounds.getMinY() + 80;
+            //Set stage position
+            miniStage.setX(x);
+            miniStage.setY(y);
 
             // When mini window closes, restore the main window
             miniStage.setOnCloseRequest(event -> currentStage.show());
