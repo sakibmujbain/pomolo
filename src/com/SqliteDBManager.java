@@ -82,7 +82,7 @@ public class SqliteDBManager {
 
     public static void insertDefaultPlaylist() {
         createPlaylistTable();
-        String sql = "INSERT OR IGNORE INTO playlists (name) VALUES ('demo')";
+        String sql = "INSERT OR IGNORE INTO playlists (name) VALUES ('liked_songs')";
         try (Connection conn = connectPlaylist(); Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
         } catch (SQLException e) {
