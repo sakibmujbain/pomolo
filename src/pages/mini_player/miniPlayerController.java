@@ -51,7 +51,7 @@ public class miniPlayerController {
                         new KeyValue(visualCircle.scaleXProperty(), 1.0),
                         new KeyValue(visualCircle.scaleYProperty(), 1.0),
                         new KeyValue(visualCircle.opacityProperty(), 0.15)),
-                new KeyFrame(Duration.seconds(1),
+                new KeyFrame(Duration.seconds(2),
                         new KeyValue(visualCircle.scaleXProperty(), 1.15),
                         new KeyValue(visualCircle.scaleYProperty(), 1.15),
                         new KeyValue(visualCircle.opacityProperty(), 0.25))
