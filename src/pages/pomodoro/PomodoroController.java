@@ -5,6 +5,7 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.animation.SequentialTransition;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -332,7 +333,10 @@ public class PomodoroController {
 
     private void updateCurrentDayTimeLabel() {
         if (currentDayTimeLabel != null) {
-            currentDayTimeLabel.setText(String.format("Today: %dm (%d sessions)", currentDayTotalMinutes, currentDaySessionCount));
+            int hours = currentDayTotalMinutes / 60;
+            int minutes = currentDayTotalMinutes % 60;
+            currentDayTimeLabel.setText(String.format(" Time:%dh %dm  Sessions:%d", hours, minutes, currentDaySessionCount));
+
         }
     }
 
@@ -342,44 +346,69 @@ public class PomodoroController {
 
         pomodoroBarChart.getData().clear();
 
-        // Fix Y-axis
+        // Fix Y-axis to hours
         yAxis.setAutoRanging(false);
         yAxis.setLowerBound(0);
-        int maxMinutes = lastSevenDaysData.stream().mapToInt(dp -> dp.minutes).max().orElse(10);
-        yAxis.setUpperBound(maxMinutes + 5);
-        yAxis.setTickUnit(5);
+        double maxHours = lastSevenDaysData.stream()
+                .mapToDouble(dp -> dp.minutes / 60.0)
+                .max()
+                .orElse(1.0);
+        maxHours = Math.min(maxHours, 12);
+        yAxis.setUpperBound(Math.max(maxHours, 1));
+        yAxis.setTickUnit(1);
+        yAxis.setLabel("");
 
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-
-        List<Integer> finalValues = lastSevenDaysData.stream()
-                .map(dp -> dp.minutes)
-                .collect(Collectors.toList());
-
-        // Add data
-        for (int i = 0; i < lastSevenDaysData.size(); i++) {
-            int value = animationPlayed ? finalValues.get(i) : 0; // keep final value if already animated
-            series.getData().add(new XYChart.Data<>(lastSevenDaysData.get(i).day, value));
-        }
+        yAxis.setTickMarkVisible(false);
 
         xAxis.setCategories(FXCollections.observableArrayList(
                 lastSevenDaysData.stream().map(dp -> dp.day).collect(Collectors.toList())
         ));
+        xAxis.setTickMarkVisible(false);
+        xAxis.setLabel("");
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+
+        List<Double> finalValues = lastSevenDaysData.stream()
+                .map(dp -> dp.minutes / 60.0)
+                .collect(Collectors.toList());
+
+        // Initialize bars to zero if not animated yet
+        for (int i = 0; i < lastSevenDaysData.size(); i++) {
+            double value = animationPlayed ? finalValues.get(i) : 0;
+            series.getData().add(new XYChart.Data<>(lastSevenDaysData.get(i).day, value));
+        }
+
         pomodoroBarChart.getData().add(series);
 
-        // Animate only once
         if (!animationPlayed) {
             animationPlayed = true;
+
+            SequentialTransition seq = new SequentialTransition();
+            double speed = 0.5; // units (hours) per millisecond
+            double initialDelay = 1000; // 1 second before starting animation
+
             for (int i = 0; i < series.getData().size(); i++) {
                 XYChart.Data<String, Number> bar = series.getData().get(i);
-                int target = finalValues.get(i);
-                Timeline timeline = new Timeline(
-                        new KeyFrame(Duration.millis(600), new KeyValue(bar.YValueProperty(), target, Interpolator.EASE_OUT))
+                double target = finalValues.get(i);
+
+                double durationMs = target / speed;
+                if (durationMs < 50) durationMs = 50; // minimum duration
+
+                Timeline tl = new Timeline(
+                        new KeyFrame(Duration.ZERO, new KeyValue(bar.YValueProperty(), 0)),
+                        new KeyFrame(Duration.millis(durationMs), new KeyValue(bar.YValueProperty(), target, Interpolator.EASE_OUT))
                 );
-                timeline.setDelay(Duration.millis(i * 300));
-                timeline.play();
+
+                seq.getChildren().add(tl);
             }
+
+            seq.setDelay(Duration.millis(initialDelay));
+            seq.play();
         }
     }
+
+
+
+
 
 
 

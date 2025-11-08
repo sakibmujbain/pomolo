@@ -110,39 +110,41 @@
             </HBox>
         </VBox>
         <!--Stats Column -->
-        <VBox alignment="TOP_LEFT" prefWidth="400" spacing="10" styleClass="pom-box">
+        <VBox alignment="TOP_LEFT" prefWidth="420" spacing="10" styleClass="pom-box">
             <padding>
                 <Insets bottom="20.0" left="15.0" right="15.0" top="0.0" />
             </padding>
 
+            <!-- Only show current day total time and sessions -->
             <HBox alignment="CENTER_LEFT" spacing="10">
-                <Label text="Daily Focus" style="-fx-font-family: monospace; -fx-font-size: 20pt; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;" />
-                <Region HBox.hgrow="ALWAYS" />
                 <Label fx:id="currentDayTimeLabel"
-                       style="-fx-font-family: monospace; -fx-font-size: 18pt; -fx-text-fill: #80E0FF;"
-                       text="Today: 0m" />
+                       style="-fx-font-family: monospace; -fx-font-size: 18pt; -fx-text-fill: #FFFFFF;"
+                       text="Today: 0m (0 sessions)" />
             </HBox>
 
-            <Line stroke="#696969" startX="0.0" endX="370.0" strokeWidth="1.0" />
+            <Line stroke="#696969" startX="0.0" endX="420.0" strokeWidth="1.0" />
 
-            <Label text="Last 7 Days Focus (Minutes)"
-                   style="-fx-font-family: monospace; -fx-font-size: 16pt; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;" />
+            <Label text="Last 7 Days"
+                   style="-fx-font-family: monospace; -fx-font-size: 16pt; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;"
+                   alignment="CENTER"
+                   maxWidth="Infinity" />
 
             <BarChart fx:id="pomodoroBarChart" VBox.vgrow="ALWAYS"
                       barGap="1.0" categoryGap="10.0" legendVisible="false"
                       style="-fx-background-color: transparent;" >
 
                 <xAxis>
-                    <CategoryAxis fx:id="xAxis" side="BOTTOM" label="Day"
-                                  style="-fx-tick-label-fill: #D0D0D0;" />
+                    <CategoryAxis fx:id="xAxis" side="BOTTOM" label=""
+                                  style="-fx-tick-label-fill: #FFFFFF;" />
                 </xAxis>
                 <yAxis>
-                    <NumberAxis fx:id="yAxis" side="LEFT" label="Time (Minutes)"
-                                style="-fx-tick-label-fill: #D0D0D0;" lowerBound="0" upperBound="60" tickUnit="10" />
+                    <NumberAxis fx:id="yAxis" side="LEFT" label=""
+                                style="-fx-tick-label-fill: #FFFFFF;" lowerBound="0" upperBound="12" tickUnit="1" />
                 </yAxis>
 
             </BarChart>
 
         </VBox>
+
     </HBox>
 </AnchorPane>

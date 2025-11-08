@@ -221,11 +221,10 @@
     -fx-padding:4px;
 }
 
-/* --- BAR GRAPH STYLE --- */
 .chart-bar {
-    -fx-bar-fill: #80E0FF;
-    -fx-stroke: transparent;
+    -fx-bar-fill: white;
 }
+
 
 .chart-horizontal-grid-lines {
     -fx-stroke: transparent;
