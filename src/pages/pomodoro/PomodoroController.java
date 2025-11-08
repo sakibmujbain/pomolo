@@ -68,6 +68,8 @@ public class PomodoroController {
 
     private List<DataPoint> lastSevenDaysData = new ArrayList<>();
     private List<String> xAxisCategories = new ArrayList<>();
+    private static boolean animationPlayed = false;
+
 
     @FXML
     public void initialize() {
@@ -173,9 +175,9 @@ public class PomodoroController {
     }
 
     @FXML
-    public void goToHome(ActionEvent e) throws Exception {
-        Parent home = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("home.fxml")));
-        Main.getRootController().setPage(home);
+    public void goToHome(ActionEvent e) throws IOException {
+            Parent home = FXMLLoader.load(Main.class.getResource("/pages/home/home.fxml"));
+            Main.getRootController().setPage(home);
     }
 
     private void startTimer(double timeRemainingAtStartOfRun) {
@@ -336,18 +338,53 @@ public class PomodoroController {
 
     private void loadAndDrawStats() {
         loadLastSevenDaysData();
-
         if (pomodoroBarChart == null) return;
+
         pomodoroBarChart.getData().clear();
 
+        // Fix Y-axis
+        yAxis.setAutoRanging(false);
+        yAxis.setLowerBound(0);
+        int maxMinutes = lastSevenDaysData.stream().mapToInt(dp -> dp.minutes).max().orElse(10);
+        yAxis.setUpperBound(maxMinutes + 5);
+        yAxis.setTickUnit(5);
+
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-        for (DataPoint dp : lastSevenDaysData) {
-            series.getData().add(new XYChart.Data<>(dp.day, dp.minutes));
+
+        List<Integer> finalValues = lastSevenDaysData.stream()
+                .map(dp -> dp.minutes)
+                .collect(Collectors.toList());
+
+        // Add data
+        for (int i = 0; i < lastSevenDaysData.size(); i++) {
+            int value = animationPlayed ? finalValues.get(i) : 0; // keep final value if already animated
+            series.getData().add(new XYChart.Data<>(lastSevenDaysData.get(i).day, value));
         }
 
-        xAxis.setCategories(FXCollections.observableArrayList(xAxisCategories));
+        xAxis.setCategories(FXCollections.observableArrayList(
+                lastSevenDaysData.stream().map(dp -> dp.day).collect(Collectors.toList())
+        ));
         pomodoroBarChart.getData().add(series);
+
+        // Animate only once
+        if (!animationPlayed) {
+            animationPlayed = true;
+            for (int i = 0; i < series.getData().size(); i++) {
+                XYChart.Data<String, Number> bar = series.getData().get(i);
+                int target = finalValues.get(i);
+                Timeline timeline = new Timeline(
+                        new KeyFrame(Duration.millis(600), new KeyValue(bar.YValueProperty(), target, Interpolator.EASE_OUT))
+                );
+                timeline.setDelay(Duration.millis(i * 300));
+                timeline.play();
+            }
+        }
     }
+
+
+
+
+
 
     private void notifyStatsUpdate() {
         updateCurrentDayTimeLabel();
