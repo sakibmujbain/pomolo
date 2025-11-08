@@ -384,7 +384,7 @@ public class PomodoroController {
 
             SequentialTransition seq = new SequentialTransition();
             double speed = 0.5; // units (hours) per millisecond
-            double initialDelay = 1000; // 1 second before starting animation
+            double initialDelay = 500; // 1 second before starting animation
 
             for (int i = 0; i < series.getData().size(); i++) {
                 XYChart.Data<String, Number> bar = series.getData().get(i);

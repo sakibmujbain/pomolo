@@ -48,7 +48,7 @@
                     </Button>
                     <Button fx:id="stopButton" onAction="#handleStop" prefHeight="50.0" prefWidth="50.0" style="-fx-font-size: 15pt; -fx-font-family: monospace;" styleClass="pomodoro-icon-btn">
                         <graphic>
-                            <FontIcon iconLiteral="fas-stop" iconSize="22" styleClass="iconli-font-icon"/>
+                            <FontIcon iconLiteral="fas-replay" iconSize="22" styleClass="iconli-font-icon"/>
                         </graphic>
                     </Button>
                 </VBox>
@@ -115,7 +115,6 @@
                 <Insets bottom="20.0" left="15.0" right="15.0" top="0.0" />
             </padding>
 
-            <!-- Only show current day total time and sessions -->
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <Label fx:id="currentDayTimeLabel"
                        style="-fx-font-family: monospace; -fx-font-size: 18pt; -fx-text-fill: #FFFFFF;"
