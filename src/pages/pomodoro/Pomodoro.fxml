@@ -48,7 +48,7 @@
                     </Button>
                     <Button fx:id="stopButton" onAction="#handleStop" prefHeight="50.0" prefWidth="50.0" style="-fx-font-size: 15pt; -fx-font-family: monospace;" styleClass="pomodoro-icon-btn">
                         <graphic>
-                            <FontIcon iconLiteral="fas-replay" iconSize="22" styleClass="iconli-font-icon"/>
+                            <FontIcon iconLiteral="fas-stop" iconSize="22" styleClass="iconli-font-icon"/>
                         </graphic>
                     </Button>
                 </VBox>
@@ -90,9 +90,9 @@
                                 <Insets bottom="200.0" />
                             </StackPane.margin>
                             <Button fx:id="increaseHourButton" onAction="#handleTimeAdjustment" prefHeight="50.0" prefWidth="50.0" styleClass="pomodoro-icon-btn">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-plus" iconSize="22" styleClass="iconli-font-icon"/>
-                            </graphic>
+                                <graphic>
+                                    <FontIcon iconLiteral="fas-plus" iconSize="22" styleClass="iconli-font-icon"/>
+                                </graphic>
                             </Button>
                             <Button fx:id="increaseMinuteButton" onAction="#handleTimeAdjustment" prefHeight="50.0" prefWidth="50.0" styleClass="pomodoro-icon-btn">
                                 <graphic>

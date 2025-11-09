@@ -177,8 +177,8 @@ public class PomodoroController {
 
     @FXML
     public void goToHome(ActionEvent e) throws IOException {
-            Parent home = FXMLLoader.load(Main.class.getResource("/pages/home/home.fxml"));
-            Main.getRootController().setPage(home);
+        Parent home = FXMLLoader.load(Main.class.getResource("/pages/home/home.fxml"));
+        Main.getRootController().setPage(home);
     }
 
     private void startTimer(double timeRemainingAtStartOfRun) {
