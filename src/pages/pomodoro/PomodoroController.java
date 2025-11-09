@@ -33,6 +33,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 public class PomodoroController {
     @FXML private Label timerLabel;
     @FXML private Button togglePlayPauseButton, stopButton;
@@ -72,6 +73,18 @@ public class PomodoroController {
 
     @FXML
     public void initialize() {
+        Properties p = new Properties();
+        try (FileInputStream in = new FileInputStream(CONFIG_FILE_NAME)) { p.load(in); } catch (Exception ignored) {}
+        LocalDate cutoff = LocalDate.now().minusDays(7);
+        p.keySet().removeIf(k -> {
+            if (k instanceof String && ((String) k).startsWith(SESSION_KEY_PREFIX)) {
+                try {
+                    LocalDate d = LocalDate.parse(((String) k).substring(SESSION_KEY_PREFIX.length()), DATE_FORMATTER);
+                    return d.isBefore(cutoff);
+                } catch (Exception ignored) { return false; } }
+            return false; });
+        try (FileOutputStream out = new FileOutputStream(CONFIG_FILE_NAME)) { p.store(out, null); } catch (Exception ignored) {}
+
         boolean wasRunning = isRunning;
         int[] dayStats = loadCurrentDayStats();
         currentDayTotalMinutes = dayStats[0];
@@ -92,13 +105,11 @@ public class PomodoroController {
                 ringtone = new AudioClip(soundPath);
             } catch (Exception e) {
                 System.err.println("Alarm will be silent."); } }
-
         if (timerProgressRing != null) {
             final double circumference = 2 * Math.PI * timerProgressRing.getRadius();
             timerProgressRing.getStrokeDashArray().setAll(circumference);
             timerProgressRing.setRotate(-90);
             setRingVisible(isRunning || isPaused); }
-
         updateTimerRingProgress();
         updateButtonStates();
         if (wasRunning) startTimer(timeRemaining); }
@@ -242,48 +253,35 @@ public class PomodoroController {
         catch (NumberFormatException ignored) { return defaultDurationSeconds; } }
 
     private int[] loadCurrentDayStats() {
-        Properties prop = new Properties();
-        String todayKey = SESSION_KEY_PREFIX + LocalDate.now().format(DATE_FORMATTER);
-        int minutes = 0, sessions = 0;
-        try (FileInputStream input = new FileInputStream(CONFIG_FILE_NAME)) {
-            prop.load(input);
-            String saved = prop.getProperty(todayKey, "0,0");
-            String[] parts = saved.split(",");
-            if (parts.length >= 2) {
-                minutes = Integer.parseInt(parts[0]);
-                sessions = Integer.parseInt(parts[1]);
-            } else {
-                minutes = Integer.parseInt(saved);
-                sessions = 0; }
-        } catch (IOException | NumberFormatException ignored) {}
-        return new int[]{minutes, sessions}; }
+        Properties p = new Properties();
+        String k = SESSION_KEY_PREFIX + LocalDate.now().format(DATE_FORMATTER);
+        int m = 0, s = 0;
+        try (FileInputStream in = new FileInputStream(CONFIG_FILE_NAME)) {
+            p.load(in);
+            String[] parts = p.getProperty(k, "0,0").split(",");
+            m = Integer.parseInt(parts[0]);
+            s = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+        } catch (Exception ignored) {}
+        return new int[]{m, s}; }
 
-    private void saveCurrentDayStats(int totalMinutes, int totalSessions) {
-        Properties prop = new Properties();
-        try (FileInputStream input = new FileInputStream(CONFIG_FILE_NAME)) {
-            prop.load(input);
-        } catch (IOException ignored) {}
-        String todayKey = SESSION_KEY_PREFIX + LocalDate.now().format(DATE_FORMATTER);
-        prop.setProperty(todayKey, totalMinutes + "," + totalSessions);
-        try (FileOutputStream output = new FileOutputStream(CONFIG_FILE_NAME)) {
-            LocalDate weekAgo = LocalDate.now().minusDays(7);
-            prop.keySet().removeIf(key -> {
-                if (key instanceof String && ((String) key).startsWith(SESSION_KEY_PREFIX)) {
-                    try {
-                        String datePart = ((String) key).substring(SESSION_KEY_PREFIX.length());
-                        LocalDate date = LocalDate.parse(datePart, DATE_FORMATTER);
-                        return date.isBefore(weekAgo);
-                    } catch (Exception e) { return false; } }
+    private void saveCurrentDayStats(int m, int s) {
+        Properties p = new Properties();
+        try (FileInputStream in = new FileInputStream(CONFIG_FILE_NAME)) { p.load(in); } catch (Exception ignored) {}
+        String k = SESSION_KEY_PREFIX + LocalDate.now().format(DATE_FORMATTER);
+        p.setProperty(k, m + "," + s);
+        try (FileOutputStream out = new FileOutputStream(CONFIG_FILE_NAME)) {
+            LocalDate w = LocalDate.now().minusDays(7);
+            p.keySet().removeIf(x -> {
+                if (x instanceof String && ((String) x).startsWith(SESSION_KEY_PREFIX)) {
+                    try { return LocalDate.parse(((String) x).substring(SESSION_KEY_PREFIX.length()), DATE_FORMATTER).isBefore(w); }
+                    catch (Exception e) { return false; } }
                 return false; });
-            prop.store(output, "Pomodoro Daily Statistics");
-        } catch (IOException ignored) {
-            System.err.println("Error saving daily stats."); } }
+            p.store(out, "Pomodoro Daily Statistics");
+        } catch (Exception ignored) { System.err.println("Error saving daily stats."); } }
 
     private void updateCurrentDayTimeLabel() {
         if (currentDayTimeLabel != null) {
-            int hours = currentDayTotalMinutes / 60;
-            int minutes = currentDayTotalMinutes % 60;
-            currentDayTimeLabel.setText(String.format(" Time:%dh %dm  Sessions:%d", hours, minutes, currentDaySessionCount)); } }
+            currentDayTimeLabel.setText(String.format(" Time:%dh %dm  Sessions:%d", currentDayTotalMinutes / 60, currentDayTotalMinutes % 60, currentDaySessionCount)); } }
 
     private void loadAndDrawStats() {
         loadLastSevenDaysData();
@@ -291,77 +289,51 @@ public class PomodoroController {
         pomodoroBarChart.getData().clear();
         yAxis.setAutoRanging(false);
         yAxis.setLowerBound(0);
-        double maxHours = lastSevenDaysData.stream()
-                .mapToDouble(dp -> dp.minutes / 60.0)
-                .max()
-                .orElse(1.0);
-        maxHours = Math.min(maxHours, 12);
-        yAxis.setUpperBound(Math.max(maxHours, 1));
+        double max = lastSevenDaysData.stream().mapToDouble(d -> d.minutes / 60.0).max().orElse(1.0);
+        yAxis.setUpperBound(Math.max(Math.min(max, 12), 1));
         yAxis.setTickUnit(1);
         yAxis.setLabel("");
         yAxis.setTickMarkVisible(false);
-        xAxis.setCategories(FXCollections.observableArrayList(
-                lastSevenDaysData.stream().map(dp -> dp.day).collect(Collectors.toList())));
+        xAxis.setCategories(FXCollections.observableArrayList(lastSevenDaysData.stream().map(d -> d.day).collect(Collectors.toList())));
         xAxis.setTickMarkVisible(false);
         xAxis.setLabel("");
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-
-        List<Double> finalValues = lastSevenDaysData.stream()
-                .map(dp -> dp.minutes / 60.0)
-                .collect(Collectors.toList());
-
-        for (int i = 0; i < lastSevenDaysData.size(); i++) {
-            double value = animationPlayed ? finalValues.get(i) : 0;
-            series.getData().add(new XYChart.Data<>(lastSevenDaysData.get(i).day, value));
-        }
-
+        List<Double> vals = lastSevenDaysData.stream().map(d -> d.minutes / 60.0).collect(Collectors.toList());
+        for (int i = 0; i < lastSevenDaysData.size(); i++) series.getData().add(new XYChart.Data<>(lastSevenDaysData.get(i).day, animationPlayed ? vals.get(i) : 0));
         pomodoroBarChart.getData().add(series);
-        if (!animationPlayed) { animationPlayed = true;
+        if (!animationPlayed) {
+            animationPlayed = true;
             SequentialTransition seq = new SequentialTransition();
-            double speed = 0.5;
-            double initialDelay = 500;
+            double spd = 0.5;
             for (int i = 0; i < series.getData().size(); i++) {
                 XYChart.Data<String, Number> bar = series.getData().get(i);
-                double target = finalValues.get(i);
-                double durationMs = target / speed;
-                if (durationMs < 50) durationMs = 50;
-                Timeline tl = new Timeline(
-                        new KeyFrame(Duration.ZERO, new KeyValue(bar.YValueProperty(), 0)),
-                        new KeyFrame(Duration.millis(durationMs), new KeyValue(bar.YValueProperty(), target, Interpolator.EASE_OUT)));
-                seq.getChildren().add(tl); }
-            seq.setDelay(Duration.millis(initialDelay));
+                double t = vals.get(i), dur = Math.max(t / spd, 50);
+                seq.getChildren().add(new Timeline(new KeyFrame(Duration.ZERO, new KeyValue(bar.YValueProperty(), 0)), new KeyFrame(Duration.millis(dur), new KeyValue(bar.YValueProperty(), t, Interpolator.EASE_OUT)))); }
+            seq.setDelay(Duration.millis(500));
             seq.play(); } }
+
     private void notifyStatsUpdate() {
         updateCurrentDayTimeLabel(); loadAndDrawStats();
-        if (updateIndicator != null) { updateIndicator.setText("Updated!");
-            Timeline fadeOut = new Timeline(
-                    new KeyFrame(Duration.seconds(0), new KeyValue(updateIndicator.opacityProperty(), 1.0)),
-                    new KeyFrame(Duration.seconds(2), new KeyValue(updateIndicator.opacityProperty(), 0.0)));
-            fadeOut.play(); } }
+        if (updateIndicator != null) {
+            updateIndicator.setText("Updated!");
+            new Timeline(new KeyFrame(Duration.seconds(0), new KeyValue(updateIndicator.opacityProperty(), 1.0)), new KeyFrame(Duration.seconds(2), new KeyValue(updateIndicator.opacityProperty(), 0.0))).play(); } }
+
     private void loadLastSevenDaysData() {
-        Properties prop = new Properties();
+        Properties p = new Properties();
         lastSevenDaysData.clear();
         xAxisCategories.clear();
-        LocalDate today = LocalDate.now();
-        try (FileInputStream input = new FileInputStream(CONFIG_FILE_NAME)) {
-            prop.load(input);
-        } catch (IOException ignored) {}
+        LocalDate t = LocalDate.now();
+        try (FileInputStream in = new FileInputStream(CONFIG_FILE_NAME)) { p.load(in); } catch (Exception ignored) {}
         for (int i = 7; i >= 1; i--) {
-            LocalDate date = today.minusDays(i);
-            String dateKey = SESSION_KEY_PREFIX + date.format(DATE_FORMATTER);
-            String dayLabel = date.getDayOfWeek().name().substring(0, 3);
-            int minutes = 0;
-            try {
-                String saved = prop.getProperty(dateKey, "0,0");
-                String[] parts = saved.split(",");
-                minutes = Integer.parseInt(parts[0]);
-            } catch (NumberFormatException ignored) {}
-            lastSevenDaysData.add(new DataPoint(dayLabel, minutes));
-            xAxisCategories.add(dayLabel); } }
+            LocalDate d = t.minusDays(i);
+            String k = SESSION_KEY_PREFIX + d.format(DATE_FORMATTER);
+            String lbl = d.getDayOfWeek().name().substring(0, 3);
+            int m = 0;
+            try { m = Integer.parseInt(p.getProperty(k, "0,0").split(",")[0]); } catch (Exception ignored) {}
+            lastSevenDaysData.add(new DataPoint(lbl, m));
+            xAxisCategories.add(lbl); } }
 
     private static class DataPoint {
-        String day;
-        int minutes;
-        public DataPoint(String day, int minutes) {
-            this.day = day;
-            this.minutes = minutes; } } }
+        String day; int minutes;
+        DataPoint(String d, int m) { day = d; minutes = m; } }
+}
