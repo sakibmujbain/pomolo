@@ -17,7 +17,7 @@ public class UserProperties {
     public Properties loadProperties(){
         Properties config = new Properties();
         String bg_image = "Background.jpg"; //By default
-
+        String default_opacity = "0.0";     //Default Opacity
         // --- New ---
         // Ensure the directory exists before trying to load
         new File(APP_DIR).mkdirs();
@@ -31,21 +31,44 @@ public class UserProperties {
             config.setProperty("default_background", bg_image);
             config.setProperty("background", bg_image);
         }
+
+        //Check if overlay opacity exists, if not make one
+        if(!config.containsKey("overlay_opacity")){
+            config.setProperty("overlay_opacity", default_opacity);
+        }
         // --- End Updated ---
 
         return config;
+    }
+
+    private void saveConfig(Properties config) throws IOException {
+        try(FileOutputStream out = new FileOutputStream(CONFIG_PATH)){
+            config.store(out, "User Settings");
+        }
     }
 
     // --- Updated: Added 'throws IOException' ---
     public void SetProperties(String backgroundImagePath) throws IOException {
         Properties config = loadProperties();
         config.setProperty("background", backgroundImagePath);
+        saveConfig(config);
+    }
 
-        // --- Updated: Removed try-catch, exception is thrown to the caller ---
-        // Also saves to the full CONFIG_PATH
-        try(FileOutputStream out = new FileOutputStream(CONFIG_PATH)){
-            config.store(out, "Set Settings");
+    // Opacity Set
+    public void setOverlayOpacity(double opacity) throws IOException{
+        Properties config = loadProperties();
+        config.setProperty("overlay_opacity", String.valueOf(opacity));
+        saveConfig(config);
+    }
+
+    // Get Opacity
+    public double getOverlayOpacity(){
+        Properties config = loadProperties();
+        String val = config.getProperty("overlay_opacity", "0.0");
+        try{
+            return Double.parseDouble(val);
+        } catch (NumberFormatException e){
+            return 0.0;
         }
-        // --- End Updated ---
     }
 }

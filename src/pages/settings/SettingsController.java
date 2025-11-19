@@ -78,12 +78,22 @@ public class SettingsController {
 
         // Control OverlayRect Opacity
         // Set initial slider value
-        overlayRectSlider.setValue(Main.getRootController().getOverlayOpacity());
+        overlayRectSlider.setValue(up.getOverlayOpacity());
 
-        // Listen for changes
+        // Listen for changes Visually
         overlayRectSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             double opacity = newVal.doubleValue();
             Main.getRootController().setOverlayOpacity(opacity);
+        });
+
+        // Change config
+        overlayRectSlider.setOnMouseReleased(event -> {
+            try {
+                double finalVal = overlayRectSlider.getValue();
+                up.setOverlayOpacity(finalVal);
+            }catch (IOException e){
+                showError("Settings Error", "Couldn't set opacity: " + e.getMessage());
+            }
         });
 
 

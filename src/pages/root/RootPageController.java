@@ -69,6 +69,7 @@ public class RootPageController {
 
         overlayRect.widthProperty().bind(((Region) overlayRect.getParent()).widthProperty());
         overlayRect.heightProperty().bind(((Region) overlayRect.getParent()).heightProperty());
+        setOverlayOpacity(up.getOverlayOpacity());
 
         // Bind pageContainer to fill width and adjust height (leaving 100px for player bar)
         pageContainer.prefWidthProperty().bind(root.widthProperty());
