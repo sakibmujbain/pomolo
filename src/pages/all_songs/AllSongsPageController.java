@@ -40,6 +40,12 @@ public class AllSongsPageController {
         this.existingSongs = existingSongs;
     }
 
+    public void loadSongs() {
+        vbox.getChildren().clear();
+        checkBoxes.clear();
+        populateSongs();
+    }
+
     public void populateSongs() {
         allSongs = SqliteDBManager.getAllSongs();
         for (SongManager.SongInfo song : allSongs) {
@@ -110,6 +116,7 @@ public class AllSongsPageController {
         Parent playlistSongsPage = loader.load();
         pages.playlist_songs.PlaylistSongsPageController controller = loader.getController();
         controller.setPlaylistName(playlistName);
+        playlistSongsPage.getProperties().put("controller", controller);
         Main.getRootController().setPage(playlistSongsPage);
     }
 

@@ -4,25 +4,31 @@ import com.Main;
 import com.MusicPlayerManager;
 import com.SongManager;
 import com.SqliteDBManager;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.concurrent.Task;
-import javafx.application.Platform;
+import org.kordamp.ikonli.javafx.FontIcon;
+import pages.all_songs.AllSongsPageController;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public class HomeController {
 
@@ -34,10 +40,6 @@ public class HomeController {
 
     @FXML
     private void initialize(){
-        // --- THIS LINE IS REMOVED ---
-        // Main.getRootController().showPlayerBar();
-        // --- END REMOVAL ---
-
         playerManager = MusicPlayerManager.getInstance();
         loadSongs();
         if (loadedSongs != null) {
@@ -47,23 +49,26 @@ public class HomeController {
 
     @FXML
     public void goToSettings(ActionEvent e) throws Exception{
-        Parent settings = FXMLLoader.load(Main.class.getResource("/pages/settings/settings.fxml"));
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource("/pages/settings/settings.fxml"));
+        Parent settings = loader.load();
+        settings.getProperties().put("controller", loader.getController());
         Main.getRootController().setPage(settings);
     }
 
     @FXML
     public void goToPlaylists() throws IOException {
-        Parent playlists = FXMLLoader.load(Main.class.getResource("/pages/playlists/playlists.fxml"));
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource("/pages/playlists/playlists.fxml"));
+        Parent playlists = loader.load();
+        playlists.getProperties().put("controller", loader.getController());
         Main.getRootController().setPage(playlists);
     }
 
     @FXML
     public void goToPomodoro(ActionEvent e) throws Exception{
-        // Load the new Pomodoro FXML
-        Parent pomodoro = FXMLLoader.load(Main.class.getResource("/pages/pomodoro/Pomodoro.fxml"));
-        // Use the main controller to switch the view
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource("/pages/pomodoro/Pomodoro.fxml"));
+        Parent pomodoro = loader.load();
+        pomodoro.getProperties().put("controller", loader.getController());
         Main.getRootController().setPage(pomodoro);
-
     }
 
     @FXML
@@ -78,12 +83,13 @@ public class HomeController {
         if (files != null && !files.isEmpty()){
             for (File file : files) {
                 try {
-                    SongManager.SongInfo music = SongManager.readMp3(file);
-                    if (music != null) {
-                        SqliteDBManager.insertNewSong(music);
+                    if (!SqliteDBManager.songExists(file.getAbsolutePath())) {
+                        SongManager.SongInfo music = SongManager.readMp3(file);
+                        if (music != null) {
+                            SqliteDBManager.insertNewSong(music);
+                        }
                     }
                 } catch (Exception ex) {
-                    // log but continue with other files
                     ex.printStackTrace();
                 }
             }
@@ -111,7 +117,6 @@ public class HomeController {
         };
 
         task.setOnSucceeded(e -> {
-            // Refresh UI on JavaFX Application Thread
             Platform.runLater(() -> {
                 loadSongs();
                 if (loadedSongs != null) {
@@ -121,7 +126,6 @@ public class HomeController {
         });
 
         task.setOnFailed(e -> {
-            // Optionally log or show an alert; for now just print stack
             Throwable ex = task.getException();
             if (ex != null) ex.printStackTrace();
         });
@@ -139,14 +143,13 @@ public class HomeController {
                 scanAndImport(f);
             } else {
                 String name = f.getName().toLowerCase();
-                if (name.endsWith(".mp3") || name.endsWith(".wav") || name.endsWith(".flac")) {
+                if ((name.endsWith(".mp3") || name.endsWith(".wav") || name.endsWith(".flac")) && !SqliteDBManager.songExists(f.getAbsolutePath())) {
                     try {
                         SongManager.SongInfo music = SongManager.readMp3(f);
                         if (music != null) {
                             SqliteDBManager.insertNewSong(music);
                         }
                     } catch (Exception ex) {
-                        // continue on errors, but log
                         ex.printStackTrace();
                     }
                 }
@@ -169,10 +172,14 @@ public class HomeController {
         songRow.setPrefHeight(40.0);
         songRow.setMaxWidth(Double.MAX_VALUE);
         songRow.getStyleClass().add("row-box");
+        songRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
+        // Play song on click, but not if the delete button was the source
         songRow.setOnMouseClicked(e -> {
-            playerManager.setQueue(loadedSongs);
-            playerManager.playSong(index);
+            if (!(e.getTarget() instanceof Button || e.getTarget() instanceof FontIcon)) {
+                playerManager.setQueue(loadedSongs);
+                playerManager.playSong(index);
+            }
         });
 
         GridPane grid = new GridPane();
@@ -182,17 +189,17 @@ public class HomeController {
 
         ColumnConstraints col1 = new ColumnConstraints();
         col1.setHalignment(HPos.LEFT);
-        col1.setPercentWidth(33.33);
+        col1.setPercentWidth(40);
         col1.setHgrow(Priority.ALWAYS);
 
         ColumnConstraints col2 = new ColumnConstraints();
         col2.setHalignment(HPos.CENTER);
-        col2.setPercentWidth(33.33);
+        col2.setPercentWidth(30);
         col2.setHgrow(Priority.ALWAYS);
 
         ColumnConstraints col3 = new ColumnConstraints();
         col3.setHalignment(HPos.RIGHT);
-        col3.setPercentWidth(33.33);
+        col3.setPercentWidth(30);
         col3.setHgrow(Priority.ALWAYS);
         grid.getColumnConstraints().addAll(col1, col2, col3);
 
@@ -216,10 +223,32 @@ public class HomeController {
         grid.add(artistText, 1, 0);
         grid.add(durationText, 2, 0);
 
-        songRow.getChildren().add(grid);
+        // --- DELETE BUTTON ---
+        Button deleteButton = new Button();
+        deleteButton.setGraphic(new FontIcon("fas-trash-alt"));
+        deleteButton.getStyleClass().add("delete-btn");
+        deleteButton.setOnAction(e -> {
+            handleDeleteSong(song);
+            e.consume(); // Prevents the row's click event from firing
+        });
+
+        songRow.getChildren().addAll(grid, deleteButton);
         HBox.setHgrow(grid, Priority.ALWAYS);
 
         return songRow;
+    }
+
+    private void handleDeleteSong(SongManager.SongInfo song) {
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Delete Song");
+        confirmation.setHeaderText("Are you sure you want to delete this song?");
+        confirmation.setContentText(song.fileName);
+
+        Optional<ButtonType> result = confirmation.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            SqliteDBManager.deleteSong(song.path);
+            loadSongs(); // Refresh the list
+        }
     }
 
     private String formatDuration(int seconds){

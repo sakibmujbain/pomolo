@@ -269,4 +269,23 @@
     -fx-icon-size: 20px;
 }
 
+.drag-over {
+    -fx-border-color: #a481ee; /* A vibrant purple to indicate a drop zone */
+    -fx-border-width: 5px;
+    -fx-border-style: dashed;
+    -fx-border-insets: -2.5; /* Inset to keep the border from affecting layout */
+}
 
+.delete-btn {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+
+.delete-btn .ikonli-font-icon {
+    -fx-icon-color: #CCCCCC; /* Default subtle gray icon */
+    -fx-icon-size: 16px;
+}
+
+.delete-btn:hover .ikonli-font-icon {
+    -fx-icon-color: #FF6347; /* Tomato red on hover */
+}
