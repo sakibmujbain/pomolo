@@ -74,10 +74,19 @@ public class HomeController {
                 new FileChooser.ExtensionFilter("Music Files", "*.mp3", "*.wav", "*.flac")
         );
         Stage stage = (Stage) rootPane.getScene().getWindow();
-        File file = fileChooser.showOpenDialog(stage);
-        if(file != null){
-            SongManager.SongInfo music = SongManager.readMp3(file);
-            SqliteDBManager.insertNewSong(music);
+        List<File> files = fileChooser.showOpenMultipleDialog(stage);
+        if (files != null && !files.isEmpty()){
+            for (File file : files) {
+                try {
+                    SongManager.SongInfo music = SongManager.readMp3(file);
+                    if (music != null) {
+                        SqliteDBManager.insertNewSong(music);
+                    }
+                } catch (Exception ex) {
+                    // log but continue with other files
+                    ex.printStackTrace();
+                }
+            }
             loadSongs();
             if (loadedSongs != null) {
                 playerManager.setQueue(loadedSongs);
