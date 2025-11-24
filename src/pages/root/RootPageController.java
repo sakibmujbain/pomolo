@@ -26,6 +26,7 @@ public class RootPageController {
     @FXML private StackPane pageContainer;
     @FXML private VBox playerBar;
     @FXML private Rectangle overlayRect;
+    @FXML private javafx.scene.layout.Region resizeGrip;
 
     UserProperties up = new UserProperties();
 
@@ -74,6 +75,74 @@ public class RootPageController {
         // Bind pageContainer to fill width and adjust height (leaving 100px for player bar)
         pageContainer.prefWidthProperty().bind(root.widthProperty());
         pageContainer.prefHeightProperty().bind(root.heightProperty().subtract(130)); // 30 for title bar + 100 for player bar
+
+        // Setup bottom-right resize grip drag handling
+        if (resizeGrip != null) {
+            // apply CSS class so dark-theme.css can style the grip
+            resizeGrip.getStyleClass().add("resize-grip");
+
+            // Keep the grip non-interactive so it never blocks clicks; we'll handle cursor and drag on the Scene.
+            resizeGrip.setMouseTransparent(true);
+            resizeGrip.setOpacity(0.12);
+            // inset the grip slightly so it sits inside the UI corner
+            resizeGrip.setTranslateX(-8);
+            resizeGrip.setTranslateY(-8);
+
+            // Now attach handlers directly to the small Region so only that corner area changes cursor and resizes.
+            final Delta d = new Delta();
+            final boolean[] resizing = {false};
+
+            // Make sure the Region actually receives mouse events (not mouseTransparent)
+            resizeGrip.setMouseTransparent(false);
+            resizeGrip.toFront();
+
+            resizeGrip.setOnMouseEntered(ev -> {
+                resizeGrip.setOpacity(0.9);
+                resizeGrip.setCursor(javafx.scene.Cursor.SE_RESIZE);
+            });
+
+            resizeGrip.setOnMouseExited(ev -> {
+                if (!resizing[0]) {
+                    resizeGrip.setOpacity(0.12);
+                    resizeGrip.setCursor(javafx.scene.Cursor.DEFAULT);
+                }
+            });
+
+            resizeGrip.setOnMousePressed(ev -> {
+                if (!ev.isPrimaryButtonDown()) return;
+                var stage = (javafx.stage.Stage) root.getScene().getWindow();
+                d.x = stage.getWidth() - ev.getSceneX();
+                d.y = stage.getHeight() - ev.getSceneY();
+                resizing[0] = true;
+                ev.consume();
+            });
+
+            resizeGrip.setOnMouseDragged(ev -> {
+                if (!resizing[0]) return;
+                var stage = (javafx.stage.Stage) root.getScene().getWindow();
+                double newW = ev.getSceneX() + d.x;
+                double newH = ev.getSceneY() + d.y;
+                newW = Math.max(300, newW);
+                newH = Math.max(200, newH);
+                try {
+                    UserProperties up = new UserProperties();
+                    if (up.getFixedAspectEnabled()) {
+                        double ratio = readSanitizedRatio(up);
+                        newH = Math.round(newW / ratio);
+                    }
+                } catch (Exception ignored) {}
+                stage.setWidth(newW);
+                stage.setHeight(newH);
+                ev.consume();
+            });
+
+            resizeGrip.setOnMouseReleased(ev -> {
+                resizing[0] = false;
+                resizeGrip.setOpacity(0.12);
+                resizeGrip.setCursor(javafx.scene.Cursor.DEFAULT);
+                ev.consume();
+            });
+        }
     }
 
     // Page Navigation (This part is for page-to-page and is correct)
@@ -159,4 +228,19 @@ public class RootPageController {
         return root;
     }
 
+    // Read ratio from properties, sanitize it, and persist correction if out of bounds.
+    private double readSanitizedRatio(UserProperties up) {
+        double ratio = up.getFixedAspectRatio();
+        // Acceptable bounds (width/height): between 0.5 (tall) and 3.0 (wide)
+        if (Double.isNaN(ratio) || ratio <= 0 || ratio < 0.5 || ratio > 3.0) {
+            double fallback = 4.0 / 3.0;
+            try {
+                up.setFixedAspectRatio(fallback);
+            } catch (Exception ignored) {}
+            return fallback;
+        }
+        return ratio;
+    }
 }
+
+class Delta { double x, y; }

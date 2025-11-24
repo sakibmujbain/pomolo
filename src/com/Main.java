@@ -9,9 +9,15 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import pages.root.RootPageController;
+import com.UserProperties;
 
 public class Main extends Application {
     public static RootPageController rootController;
+    private static Stage primaryStage;
+    private static javafx.beans.value.ChangeListener<Number> widthListener;
+    private static javafx.beans.value.ChangeListener<Number> heightListener;
+    private static boolean resizingAdjusting = false;
+    private static double fixedRatio = 16.0 / 9.0; // default
 
     public static void main(String[] args) {
         launch(args);
@@ -22,6 +28,7 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(Main.class.getResource("/pages/root/rootPage.fxml"));
         Parent root = loader.load();
         rootController = loader.getController();
+        primaryStage = stage;
 
         Scene scene = new Scene(root, 1280, 720);
         //Scene scene = new Scene(root, 960, 540);
@@ -30,9 +37,24 @@ public class Main extends Application {
         // 1. Remove default window decorations
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setTitle("Pomolo");
-        stage.setResizable(false);
+        // allow resizing so user can change window size; fixed-aspect will be enforced if enabled
+        stage.setResizable(true);
 
         stage.setScene(scene);
+
+        // Apply user preferred fixed-aspect settings if any (sanitize stored ratio)
+        try {
+            UserProperties up = new UserProperties();
+            boolean enabled = up.getFixedAspectEnabled();
+            double ratio = up.getFixedAspectRatio();
+            // sanitize: acceptable bounds 0.5..3.0 (width/height). If out of bounds, reset to 16:9
+            if (Double.isNaN(ratio) || ratio <= 0 || ratio < 0.5 || ratio > 3.0) {
+                ratio = 16.0 / 9.0;
+                up.setFixedAspectRatio(ratio);
+            }
+            setFixedAspectRatioEnabled(enabled, ratio);
+        } catch (Exception ignored) {}
+
         stage.show();
 
         FadeTransition fadeIn = new FadeTransition(Duration.millis(300), root);
@@ -49,6 +71,48 @@ public class Main extends Application {
 
     public static RootPageController getRootController(){
         return rootController;
+    }
+
+    /**
+     * Enable or disable a fixed window aspect ratio. When enabled, window width/height are kept to ratio.
+     * The ratio is width/height (e.g. 16.0/9.0).
+     */
+    public static void setFixedAspectRatioEnabled(boolean enabled, double ratio) {
+        if (primaryStage == null) return;
+        // remove existing listeners first
+        if (widthListener != null) primaryStage.widthProperty().removeListener(widthListener);
+        if (heightListener != null) primaryStage.heightProperty().removeListener(heightListener);
+        widthListener = null; heightListener = null;
+        fixedRatio = ratio;
+
+        if (!enabled) return;
+
+        widthListener = (obs, old, nw) -> {
+            if (resizingAdjusting) return;
+            try {
+                resizingAdjusting = true;
+                double newWidth = nw.doubleValue();
+                double newHeight = Math.max(100, newWidth / fixedRatio);
+                primaryStage.setHeight(newHeight);
+            } finally {
+                resizingAdjusting = false;
+            }
+        };
+
+        heightListener = (obs, old, nh) -> {
+            if (resizingAdjusting) return;
+            try {
+                resizingAdjusting = true;
+                double newHeight = nh.doubleValue();
+                double newWidth = Math.max(200, newHeight * fixedRatio);
+                primaryStage.setWidth(newWidth);
+            } finally {
+                resizingAdjusting = false;
+            }
+        };
+
+        primaryStage.widthProperty().addListener(widthListener);
+        primaryStage.heightProperty().addListener(heightListener);
     }
 
     /**
