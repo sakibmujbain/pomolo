@@ -218,7 +218,7 @@
     -fx-border-color: white;
     -fx-border-width: 2px;
     -fx-border-radius: 10px;
-    -fx-padding:4px;
+    -fx-padding:10px;
 }
 
 .chart-bar {
