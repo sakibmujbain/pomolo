@@ -17,7 +17,10 @@ public class UserProperties {
     public Properties loadProperties(){
         Properties config = new Properties();
         String bg_image = "Background.jpg"; //By default
-        String default_opacity = "0.0";     //Default Opacity
+        String default_opacity = "0.0"; //Default Opacity
+        String default_width = "960";
+        String default_height = "540";
+
         // --- New ---
         // Ensure the directory exists before trying to load
         new File(APP_DIR).mkdirs();
@@ -35,6 +38,14 @@ public class UserProperties {
         //Check if overlay opacity exists, if not make one
         if(!config.containsKey("overlay_opacity")){
             config.setProperty("overlay_opacity", default_opacity);
+        }
+
+        //Check if window width and height exists, if not make one
+        if(!config.containsKey("window_width")){
+            config.setProperty("window_width", default_width);
+        }
+        if(!config.containsKey("window_height")){
+            config.setProperty("window_height", default_height);
         }
         // --- End Updated ---
 
@@ -69,6 +80,42 @@ public class UserProperties {
             return Double.parseDouble(val);
         } catch (NumberFormatException e){
             return 0.0;
+        }
+    }
+
+    // Set width
+    public void setWindowWidth(double val) throws IOException{
+        Properties config = loadProperties();
+        config.setProperty("window_width", String.valueOf(val));
+        saveConfig(config);
+    }
+
+    // Get width
+    public double getWindowWidth(){
+        Properties config = loadProperties();
+        String val = config.getProperty("window_width", "960.0");
+        try{
+            return Double.parseDouble(val);
+        } catch (NumberFormatException e){
+            return 960.0;
+        }
+    }
+
+    // Set height
+    public void setWindowHeight(double val) throws IOException{
+        Properties config = loadProperties();
+        config.setProperty("window_height", String.valueOf(val));
+        saveConfig(config);
+    }
+
+    // Get height
+    public double getWindowHeight(){
+        Properties config = loadProperties();
+        String val = config.getProperty("window_height", "540.0");
+        try{
+            return Double.parseDouble(val);
+        } catch (NumberFormatException e){
+            return 540.0;
         }
     }
 }

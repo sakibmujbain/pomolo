@@ -58,6 +58,38 @@
                             </children>
                         </HBox>
 
+                        <HBox fx:id="topBar1111" blendMode="SCREEN" prefHeight="43.0" styleClass="row-box" stylesheets="../../css/home.css">
+                            <children>
+                                <GridPane prefHeight="30.0" HBox.hgrow="ALWAYS">
+                                    <columnConstraints>
+                                        <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    </rowConstraints>
+                                    <children>
+                                        <HBox>
+                                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Window Width: " textAlignment="CENTER">
+                                            <font>
+                                                <Font name="Monospaced Regular" size="13.0" />
+                                            </font>
+                                        </Text>
+                                        <Text fx:id="windowWidthText" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="1280px" textAlignment="CENTER">
+                                            <font>
+                                                <Font name="Monospaced Regular" size="13.0" />
+                                            </font>
+                                        </Text>
+                                        </HBox>
+                                        <Slider fx:id="windowWidthSlider" max="1920" min="960" GridPane.columnIndex="1" />
+                                    </children>
+                                    <padding>
+                                        <Insets left="10.0" right="10.0" />
+                                    </padding>
+                                </GridPane>
+                            </children>
+                        </HBox>
+
                         <HBox fx:id="topBar111" blendMode="SCREEN" prefHeight="43.0" styleClass="row-box" stylesheets="../../css/home.css">
                             <children>
                                 <GridPane prefHeight="30.0" HBox.hgrow="ALWAYS">

@@ -15,6 +15,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import pages.player_bar.PlayerBarController;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
@@ -22,12 +24,15 @@ import java.util.Properties;
 public class SettingsController {
     @FXML private AnchorPane rootPane;
     @FXML private Text path_text;
+    @FXML private Slider windowWidthSlider;
+    @FXML private Text windowWidthText;
     @FXML private Slider overlayRectSlider;
     @FXML private Slider rainVolumeSlider;
     @FXML private Slider fireplaceVolumeSlider;
     @FXML private Slider windVolumeSlider;
 
     UserProperties up = new UserProperties();
+    double aspect_ratio;
 
     @FXML
     private void initialize(){
@@ -48,6 +53,22 @@ public class SettingsController {
         } catch (IOException e) {
             showError("Properties Error", "Could not load user settings: " + e.getMessage());
         }
+
+        // Set initial width slider value
+        changeAspectRatio(up.getWindowWidth(), up.getWindowHeight());
+        windowWidthSlider.setValue(Main.getRootController().getPageContainer().getPrefWidth());
+
+        // Listen for changes
+        windowWidthSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            int width = (int) newVal.doubleValue();
+            windowWidthText.setText(Integer.toString(width) + "px");
+        });
+
+        //Change Window Width
+        windowWidthSlider.setOnMouseReleased(e ->{
+            double width = windowWidthSlider.getValue();
+            Main.changeWindowWidth(width, aspect_ratio);
+        });
 
         // Set initial slider value
         rainVolumeSlider.setValue(PlayerBarController.APM.getRainVolume() * 100);
@@ -116,6 +137,16 @@ public class SettingsController {
                 up.SetProperties(imagePath);
                 Main.getRootController().SetBackgroundImage(imagePath);
                 path_text.setText(imagePath);
+
+                // Set Aspect Ratio
+                BufferedImage img = ImageIO.read(new File(imagePath));
+                changeAspectRatio(img.getWidth(), img.getHeight());
+
+                // Write Aspect Ratio in UserProperties
+                up.setWindowWidth(img.getWidth());
+                up.setWindowHeight(img.getHeight());
+                changeAspectRatio(up.getWindowWidth(), up.getWindowHeight());
+
             } catch (IOException e) {
                 showError("Properties Error", "Could not save new background image setting: " + e.getMessage());
             }
@@ -139,4 +170,10 @@ public class SettingsController {
         alert.setContentText(content);
         alert.showAndWait();
     }
+
+    // Change aspect ratio based on background image
+    private void changeAspectRatio(double width, double height){
+        aspect_ratio = width/height;
+    }
+
 }

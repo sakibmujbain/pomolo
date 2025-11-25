@@ -10,8 +10,12 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import pages.root.RootPageController;
 
+import java.io.IOException;
+
 public class Main extends Application {
     public static RootPageController rootController;
+    public static Stage main_stage;
+    public static UserProperties up;
 
     public static void main(String[] args) {
         launch(args);
@@ -23,9 +27,13 @@ public class Main extends Application {
         Parent root = loader.load();
         rootController = loader.getController();
 
-        Scene scene = new Scene(root, 1280, 720);
+        up = new UserProperties();
+
+        Scene scene = new Scene(root, up.getWindowWidth(), up.getWindowHeight());
         //Scene scene = new Scene(root, 960, 540);
         scene.getStylesheets().add(Main.class.getResource("/css/home.css").toExternalForm());
+
+        main_stage = stage;
 
         // 1. Remove default window decorations
         stage.initStyle(StageStyle.UNDECORATED);
@@ -49,5 +57,18 @@ public class Main extends Application {
 
     public static RootPageController getRootController(){
         return rootController;
+    }
+
+    public static void changeWindowWidth(double width, double aspect_ratio){
+        main_stage.setWidth(width);
+        main_stage.setHeight(width / aspect_ratio);
+
+        try{
+            up.setWindowWidth(width);
+            up.setWindowHeight(width / aspect_ratio);
+        }catch (IOException e){
+            System.out.println("Settings Error, Couldn't set width and height: " + e.getMessage());
+
+        }
     }
 }
