@@ -19,6 +19,8 @@ import javafx.util.Duration;
 import models.PomodoroModel;
 import org.kordamp.ikonli.javafx.FontIcon;
 import pages.player_bar.PlayerBarController;
+import javafx.animation.Interpolator;
+
 
 public class miniPlayerController {
 
@@ -91,6 +93,8 @@ public class miniPlayerController {
 
 
         // Initial State
+        root.setScaleX(0.3);
+        root.setScaleY(0.3);
         uiContainer.setOpacity(0);
         musicDesign.setOpacity(1);
 
@@ -187,16 +191,21 @@ public class miniPlayerController {
     }
 
     private void setupHoverAnimations() {
+        final double unhoveredScale = 0.3;
+        final double hoveredScale = 1.0;
+        final Duration animationDuration = Duration.millis(300);
+
         root.setOnMouseEntered(e -> {
-            // Focus Logic handled globally in Main now, but keeping this doesn't hurt
             root.requestFocus();
             animateFade(uiContainer, 1.0);
             animateFade(musicDesign, 0.0);
+            animateScale(root, hoveredScale, animationDuration);
         });
 
         root.setOnMouseExited(e -> {
             animateFade(uiContainer, 0.0);
             animateFade(musicDesign, 1.0);
+            animateScale(root, unhoveredScale, animationDuration);
         });
     }
 
@@ -204,6 +213,14 @@ public class miniPlayerController {
         FadeTransition fade = new FadeTransition(Duration.millis(300), node);
         fade.setToValue(targetOpacity);
         fade.play();
+    }
+
+    private void animateScale(Node node, double targetScale, Duration duration) {
+        ScaleTransition st = new ScaleTransition(duration, node);
+        st.setToX(targetScale);
+        st.setToY(targetScale);
+        st.setInterpolator(Interpolator.EASE_BOTH);
+        st.play();
     }
 
     private void setupGlowEffect() {
