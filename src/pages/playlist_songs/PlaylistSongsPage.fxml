@@ -21,10 +21,11 @@
             </font>
         </Text>
         </HBox>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="300.0"
+        <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER"
                     AnchorPane.leftAnchor="35.0"
                     AnchorPane.rightAnchor="35.0"
                     AnchorPane.topAnchor="159.0"
+                    AnchorPane.bottomAnchor="35.0"
         >
             <content>
                 <VBox fx:id="vbox" prefHeight="0.0">
@@ -34,7 +35,7 @@
                 </VBox>
             </content>
         </ScrollPane>
-        <HBox fx:id="topBar" alignment="CENTER" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="35.0" AnchorPane.topAnchor="109.0" prefHeight="43.0" prefWidth="906.0" style="-fx-border-color: white; -fx-border-width: 2px;">
+        <HBox fx:id="topBar" alignment="CENTER" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="35.0" AnchorPane.topAnchor="109.0" prefHeight="43.0" style="-fx-border-color: white; -fx-border-width: 2px;">
             <children>
                 <GridPane prefHeight="30.0" HBox.hgrow="ALWAYS">
                     <columnConstraints>

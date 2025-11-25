@@ -76,9 +76,19 @@ public class AllSongsPageController {
         grid.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(grid, Priority.ALWAYS);
 
-        grid.getColumnConstraints().add(new ColumnConstraints(400));
-        grid.getColumnConstraints().add(new ColumnConstraints(200));
-        grid.getColumnConstraints().add(new ColumnConstraints(100));
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setPercentWidth(50);
+        col1.setHgrow(Priority.ALWAYS);
+
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setPercentWidth(30);
+        col2.setHalignment(HPos.CENTER);
+
+        ColumnConstraints col3 = new ColumnConstraints();
+        col3.setPercentWidth(20);
+        col3.setHalignment(HPos.RIGHT);
+
+        grid.getColumnConstraints().addAll(col1, col2, col3);
 
         Text titleText = new Text(song.fileName);
         titleText.setFill(Color.WHITE);
@@ -95,9 +105,6 @@ public class AllSongsPageController {
         grid.add(titleText, 0, 0);
         grid.add(artistText, 1, 0);
         grid.add(durationText, 2, 0);
-
-        GridPane.setHalignment(artistText, HPos.CENTER);
-        GridPane.setHalignment(durationText, HPos.RIGHT);
 
         songRow.getChildren().addAll(checkBox, grid);
         return songRow;

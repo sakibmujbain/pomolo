@@ -12,6 +12,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -31,6 +32,7 @@ public class PlaylistSongsPageController {
     @FXML private AnchorPane rootPane;
     @FXML private Text playlistNameText;
     @FXML private VBox vbox;
+    @FXML private ScrollPane scrollPane;
 
     private String playlistName;
     private MusicPlayerManager playerManager;
@@ -45,6 +47,7 @@ public class PlaylistSongsPageController {
     @FXML
     private void initialize() {
         playerManager = MusicPlayerManager.getInstance();
+        vbox.prefHeightProperty().bind(scrollPane.heightProperty());
     }
 
     private void loadSongs() {
