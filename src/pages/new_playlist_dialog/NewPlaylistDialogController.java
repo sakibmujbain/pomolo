@@ -21,9 +21,16 @@ public class NewPlaylistDialogController {
         String playlistName = playlistNameField.getText();
         if (playlistName != null && !playlistName.isEmpty()) {
             SqliteDBManager.insertNewPlaylist(playlistName);
-            playlistsPageController.loadPlaylists();
+            if (playlistsPageController != null) {
+                playlistsPageController.loadPlaylists();
+            }
             closeDialog();
         }
+    }
+
+    @FXML
+    private void handleCancel() {
+        closeDialog();
     }
 
     private void closeDialog() {

@@ -12,23 +12,23 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.kordamp.ikonli.javafx.FontIcon;
-import pages.all_songs.AllSongsPageController;
+import pages.confirmation_dialog.ConfirmationDialogController;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 public class HomeController {
 
@@ -239,15 +239,29 @@ public class HomeController {
     }
 
     private void handleDeleteSong(SongManager.SongInfo song) {
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("Delete Song");
-        confirmation.setHeaderText("Are you sure you want to delete this song?");
-        confirmation.setContentText(song.fileName);
+        try {
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("/pages/confirmation_dialog/ConfirmationDialog.fxml"));
+            Parent root = loader.load();
+            ConfirmationDialogController controller = loader.getController();
+            controller.setMessage("Are you sure you want to delete this song?\n\n" + song.fileName);
 
-        Optional<ButtonType> result = confirmation.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            SqliteDBManager.deleteSong(song.path);
-            loadSongs(); // Refresh the list
+            Stage dialogStage = new Stage();
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            dialogStage.initOwner(rootPane.getScene().getWindow());
+            dialogStage.initStyle(StageStyle.TRANSPARENT);
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+            dialogStage.setScene(scene);
+            controller.setDialogStage(dialogStage);
+
+            dialogStage.showAndWait();
+
+            if (controller.isConfirmed()) {
+                SqliteDBManager.deleteSong(song.path);
+                loadSongs(); // Refresh the list
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
