@@ -14,6 +14,8 @@ import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -24,11 +26,14 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.kordamp.ikonli.javafx.FontIcon;
+import pages.components.Toast;
 import pages.confirmation_dialog.ConfirmationDialogController;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class HomeController {
 
@@ -42,6 +47,74 @@ public class HomeController {
     private void initialize(){
         playerManager = MusicPlayerManager.getInstance();
         loadSongs();
+        if (loadedSongs != null) {
+            playerManager.setQueue(loadedSongs);
+        }
+        setupDragAndDrop();
+    }
+
+    private void setupDragAndDrop() {
+        rootPane.setOnDragOver(event -> {
+            Dragboard db = event.getDragboard();
+            if (db.hasFiles()) {
+                event.acceptTransferModes(TransferMode.COPY);
+            } else {
+                event.consume();
+            }
+        });
+
+        rootPane.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+            if (db.hasFiles()) {
+                success = true;
+                processDroppedFiles(db.getFiles());
+            }
+            event.setDropCompleted(success);
+            event.consume();
+        });
+    }
+
+    private void processDroppedFiles(List<File> files) {
+        int addedCount = 0;
+        int duplicateCount = 0;
+        List<String> validExtensions = List.of(".mp3", ".wav", ".flac");
+
+        for (File file : files) {
+            String fileName = file.getName().toLowerCase();
+            boolean isValidExtension = validExtensions.stream().anyMatch(fileName::endsWith);
+
+            if (isValidExtension) {
+                try {
+                    if (SqliteDBManager.songExists(file.getAbsolutePath())) {
+                        duplicateCount++;
+                    } else {
+                        SongManager.SongInfo music = SongManager.readMp3(file);
+                        if (music != null) {
+                            SqliteDBManager.insertNewSong(music);
+                            addedCount++;
+                        }
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+
+        Stage stage = (Stage) rootPane.getScene().getWindow();
+        List<String> messages = new ArrayList<>();
+        if (addedCount > 0) {
+            messages.add(addedCount + (addedCount == 1 ? " new song added" : " new songs added"));
+        }
+        if (duplicateCount > 0) {
+            messages.add(duplicateCount + (duplicateCount == 1 ? " song already exists" : " songs already exist"));
+        }
+
+        if (!messages.isEmpty()) {
+            String finalMessage = String.join(". ", messages);
+            Toast.show(finalMessage, stage, this::loadSongs);
+        }
+
         if (loadedSongs != null) {
             playerManager.setQueue(loadedSongs);
         }
@@ -81,19 +154,22 @@ public class HomeController {
         Stage stage = (Stage) rootPane.getScene().getWindow();
         List<File> files = fileChooser.showOpenMultipleDialog(stage);
         if (files != null && !files.isEmpty()){
+            int addedCount = 0;
             for (File file : files) {
                 try {
                     if (!SqliteDBManager.songExists(file.getAbsolutePath())) {
                         SongManager.SongInfo music = SongManager.readMp3(file);
                         if (music != null) {
                             SqliteDBManager.insertNewSong(music);
+                            addedCount++;
                         }
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
-            loadSongs();
+            String message = addedCount + (addedCount == 1 ? " song added" : " songs added");
+            Toast.show(message, (Stage) rootPane.getScene().getWindow(), this::loadSongs);
             if (loadedSongs != null) {
                 playerManager.setQueue(loadedSongs);
             }
@@ -108,17 +184,19 @@ public class HomeController {
         File dir = dirChooser.showDialog(stage);
         if (dir == null || !dir.isDirectory()) return;
 
+        AtomicInteger importedCount = new AtomicInteger();
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                scanAndImport(dir);
+                scanAndImport(dir, importedCount);
                 return null;
             }
         };
 
         task.setOnSucceeded(e -> {
             Platform.runLater(() -> {
-                loadSongs();
+                String message = importedCount.get() + (importedCount.get() == 1 ? " song imported" : " songs imported");
+                Toast.show(message, (Stage) rootPane.getScene().getWindow(), this::loadSongs);
                 if (loadedSongs != null) {
                     playerManager.setQueue(loadedSongs);
                 }
@@ -135,12 +213,12 @@ public class HomeController {
         th.start();
     }
 
-    private void scanAndImport(File directory) {
+    private void scanAndImport(File directory, AtomicInteger importedCount) {
         File[] files = directory.listFiles();
         if (files == null) return;
         for (File f : files) {
             if (f.isDirectory()) {
-                scanAndImport(f);
+                scanAndImport(f, importedCount);
             } else {
                 String name = f.getName().toLowerCase();
                 if ((name.endsWith(".mp3") || name.endsWith(".wav") || name.endsWith(".flac")) && !SqliteDBManager.songExists(f.getAbsolutePath())) {
@@ -148,6 +226,7 @@ public class HomeController {
                         SongManager.SongInfo music = SongManager.readMp3(f);
                         if (music != null) {
                             SqliteDBManager.insertNewSong(music);
+                            importedCount.getAndIncrement();
                         }
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -258,7 +337,7 @@ public class HomeController {
 
             if (controller.isConfirmed()) {
                 SqliteDBManager.deleteSong(song.path);
-                loadSongs(); // Refresh the list
+                Toast.show("Song removed from library", (Stage) rootPane.getScene().getWindow(), this::loadSongs);
             }
         } catch (IOException e) {
             e.printStackTrace();

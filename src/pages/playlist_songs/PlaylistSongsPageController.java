@@ -4,6 +4,7 @@ import com.Main;
 import com.MusicPlayerManager;
 import com.SongManager;
 import com.SqliteDBManager;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
@@ -19,6 +20,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import pages.all_songs.AllSongsPageController;
+import pages.components.Toast;
 import pages.confirmation_dialog.ConfirmationDialogController;
 
 import java.io.IOException;
@@ -144,7 +146,7 @@ public class PlaylistSongsPageController {
 
                 if (controller.isConfirmed()) {
                     SqliteDBManager.removeSongFromPlaylist(song, playlistName);
-                    loadSongs();
+                    Toast.show("Song removed from playlist", (Stage) rootPane.getScene().getWindow(), this::loadSongs);
                 }
             } catch (IOException ioException) {
                 ioException.printStackTrace();

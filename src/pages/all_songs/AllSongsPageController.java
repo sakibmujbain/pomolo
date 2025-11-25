@@ -3,6 +3,7 @@ package pages.all_songs;
 import com.Main;
 import com.SongManager;
 import com.SqliteDBManager;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
@@ -17,6 +18,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import pages.components.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -101,13 +104,21 @@ public class AllSongsPageController {
     }
 
     @FXML
-    private void addSelectedSongs() throws IOException {
+    private void addSelectedSongs() {
+        int addedCount = 0;
         for (int i = 0; i < checkBoxes.size(); i++) {
             if (checkBoxes.get(i).isSelected()) {
                 SqliteDBManager.addSongToPlaylist(allSongs.get(i), playlistName);
+                addedCount++;
             }
         }
-        goBack();
+
+        if (addedCount > 0) {
+            String message = addedCount + (addedCount == 1 ? " song added" : " songs added");
+            Toast.show(message, (Stage) vbox.getScene().getWindow(), this::goBackSafe);
+        } else {
+            goBackSafe();
+        }
     }
 
     @FXML
@@ -118,6 +129,16 @@ public class AllSongsPageController {
         controller.setPlaylistName(playlistName);
         playlistSongsPage.getProperties().put("controller", controller);
         Main.getRootController().setPage(playlistSongsPage);
+    }
+
+    private void goBackSafe() {
+        Platform.runLater(() -> {
+            try {
+                goBack();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private String formatDuration(int seconds) {

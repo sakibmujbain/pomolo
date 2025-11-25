@@ -17,6 +17,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import pages.components.Toast;
 import pages.confirmation_dialog.ConfirmationDialogController;
 import pages.new_playlist_dialog.NewPlaylistDialogController;
 import pages.playlist_songs.PlaylistSongsPageController;
@@ -33,6 +34,10 @@ public class PlaylistsPageController {
     private void initialize(){
         SqliteDBManager.insertDefaultPlaylist();
         loadPlaylists();
+    }
+
+    public Stage getStage() {
+        return (Stage) rootPane.getScene().getWindow();
     }
 
     @FXML
@@ -171,7 +176,7 @@ public class PlaylistsPageController {
 
             if (controller.isConfirmed()) {
                 SqliteDBManager.deletePlaylist(playlist.name);
-                loadPlaylists();
+                Toast.show("Playlist deleted", (Stage) rootPane.getScene().getWindow(), this::loadPlaylists);
             }
         } catch (IOException ioException) {
             ioException.printStackTrace();
