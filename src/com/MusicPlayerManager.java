@@ -105,7 +105,7 @@ public class MusicPlayerManager {
         } catch (Exception e) {
             System.err.println("Error playing song: " + e.getMessage());
             isPlaying.set(false);
-            SqliteDBManager.removeSongFromDB(song.path);
+            SqliteDBManager.deleteSong(song.path);
         }
     }
 

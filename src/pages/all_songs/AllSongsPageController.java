@@ -3,6 +3,7 @@ package pages.all_songs;
 import com.Main;
 import com.SongManager;
 import com.SqliteDBManager;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
@@ -17,6 +18,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import pages.components.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +41,12 @@ public class AllSongsPageController {
 
     public void setExistingSongs(List<SongManager.SongInfo> existingSongs) {
         this.existingSongs = existingSongs;
+    }
+
+    public void loadSongs() {
+        vbox.getChildren().clear();
+        checkBoxes.clear();
+        populateSongs();
     }
 
     public void populateSongs() {
@@ -67,9 +76,19 @@ public class AllSongsPageController {
         grid.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(grid, Priority.ALWAYS);
 
-        grid.getColumnConstraints().add(new ColumnConstraints(400));
-        grid.getColumnConstraints().add(new ColumnConstraints(200));
-        grid.getColumnConstraints().add(new ColumnConstraints(100));
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setPercentWidth(50);
+        col1.setHgrow(Priority.ALWAYS);
+
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setPercentWidth(30);
+        col2.setHalignment(HPos.CENTER);
+
+        ColumnConstraints col3 = new ColumnConstraints();
+        col3.setPercentWidth(20);
+        col3.setHalignment(HPos.RIGHT);
+
+        grid.getColumnConstraints().addAll(col1, col2, col3);
 
         Text titleText = new Text(song.fileName);
         titleText.setFill(Color.WHITE);
@@ -87,21 +106,26 @@ public class AllSongsPageController {
         grid.add(artistText, 1, 0);
         grid.add(durationText, 2, 0);
 
-        GridPane.setHalignment(artistText, HPos.CENTER);
-        GridPane.setHalignment(durationText, HPos.RIGHT);
-
         songRow.getChildren().addAll(checkBox, grid);
         return songRow;
     }
 
     @FXML
-    private void addSelectedSongs() throws IOException {
+    private void addSelectedSongs() {
+        int addedCount = 0;
         for (int i = 0; i < checkBoxes.size(); i++) {
             if (checkBoxes.get(i).isSelected()) {
                 SqliteDBManager.addSongToPlaylist(allSongs.get(i), playlistName);
+                addedCount++;
             }
         }
-        goBack();
+
+        if (addedCount > 0) {
+            String message = addedCount + (addedCount == 1 ? " song added" : " songs added");
+            Toast.show(message, (Stage) vbox.getScene().getWindow(), this::goBackSafe);
+        } else {
+            goBackSafe();
+        }
     }
 
     @FXML
@@ -110,7 +134,18 @@ public class AllSongsPageController {
         Parent playlistSongsPage = loader.load();
         pages.playlist_songs.PlaylistSongsPageController controller = loader.getController();
         controller.setPlaylistName(playlistName);
+        playlistSongsPage.getProperties().put("controller", controller);
         Main.getRootController().setPage(playlistSongsPage);
+    }
+
+    private void goBackSafe() {
+        Platform.runLater(() -> {
+            try {
+                goBack();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private String formatDuration(int seconds) {

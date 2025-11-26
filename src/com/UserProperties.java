@@ -118,4 +118,5 @@ public class UserProperties {
             return 540.0;
         }
     }
+
 }

@@ -4,33 +4,35 @@ import com.Main;
 import com.MusicPlayerManager;
 import com.SongManager;
 import com.SqliteDBManager;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import pages.all_songs.AllSongsPageController;
+import pages.components.Toast;
 import pages.confirmation_dialog.ConfirmationDialogController;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 public class PlaylistSongsPageController {
 
     @FXML private AnchorPane rootPane;
     @FXML private Text playlistNameText;
     @FXML private VBox vbox;
+    @FXML private ScrollPane scrollPane;
 
     private String playlistName;
     private MusicPlayerManager playerManager;
@@ -45,6 +47,7 @@ public class PlaylistSongsPageController {
     @FXML
     private void initialize() {
         playerManager = MusicPlayerManager.getInstance();
+        vbox.prefHeightProperty().bind(scrollPane.heightProperty());
     }
 
     private void loadSongs() {
@@ -75,6 +78,9 @@ public class PlaylistSongsPageController {
         songRow.getStyleClass().add("row-box");
 
         songRow.setOnMouseClicked(e -> {
+            if (e.getTarget() instanceof Button) {
+                return;
+            }
             playerManager.setQueue(playlistSongs);
             playerManager.playSong(index);
         });
@@ -133,14 +139,17 @@ public class PlaylistSongsPageController {
                 Stage dialogStage = new Stage();
                 dialogStage.initModality(Modality.APPLICATION_MODAL);
                 dialogStage.initOwner(rootPane.getScene().getWindow());
-                dialogStage.setScene(new Scene(root));
+                dialogStage.initStyle(StageStyle.TRANSPARENT);
+                Scene scene = new Scene(root);
+                scene.setFill(Color.TRANSPARENT);
+                dialogStage.setScene(scene);
                 controller.setDialogStage(dialogStage);
 
                 dialogStage.showAndWait();
 
                 if (controller.isConfirmed()) {
                     SqliteDBManager.removeSongFromPlaylist(song, playlistName);
-                    loadSongs();
+                    Toast.show("Song removed from playlist", (Stage) rootPane.getScene().getWindow(), this::loadSongs);
                 }
             } catch (IOException ioException) {
                 ioException.printStackTrace();
@@ -151,6 +160,7 @@ public class PlaylistSongsPageController {
         grid.add(artistText, 1, 0);
         grid.add(durationText, 2, 0);
         grid.add(deleteButton, 3, 0);
+
 
         songRow.getChildren().add(grid);
         HBox.setHgrow(grid, Priority.ALWAYS);

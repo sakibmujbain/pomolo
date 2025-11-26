@@ -4,6 +4,7 @@ import com.SqliteDBManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import pages.components.Toast;
 import pages.playlists.PlaylistsPageController;
 
 public class NewPlaylistDialogController {
@@ -21,9 +22,18 @@ public class NewPlaylistDialogController {
         String playlistName = playlistNameField.getText();
         if (playlistName != null && !playlistName.isEmpty()) {
             SqliteDBManager.insertNewPlaylist(playlistName);
-            playlistsPageController.loadPlaylists();
-            closeDialog();
+            if (playlistsPageController != null) {
+                playlistsPageController.loadPlaylists();
+                Toast.show("Playlist '" + playlistName + "' created", playlistsPageController.getStage(), this::closeDialog);
+            } else {
+                closeDialog();
+            }
         }
+    }
+
+    @FXML
+    private void handleCancel() {
+        closeDialog();
     }
 
     private void closeDialog() {

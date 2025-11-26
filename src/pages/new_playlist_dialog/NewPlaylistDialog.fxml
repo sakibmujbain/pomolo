@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.geometry.Insets?>
 
-<VBox alignment="CENTER" spacing="10.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pages.new_playlist_dialog.NewPlaylistDialogController" styleClass="root" stylesheets="@/css/dark-theme.css">
+<VBox alignment="CENTER" spacing="10.0" styleClass="root" stylesheets="@../../css/dark-theme.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pages.new_playlist_dialog.NewPlaylistDialogController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
     <children>
         <Label text="Enter Playlist Name" styleClass="label"/>
         <TextField fx:id="playlistNameField" styleClass="text-field"/>
-        <Button text="Create" onAction="#createPlaylist" styleClass="button"/>
+        <HBox alignment="CENTER" spacing="15.0">
+            <children>
+                <Button onAction="#handleCancel" prefWidth="80.0" styleClass="button" text="Cancel" />
+                <Button onAction="#createPlaylist" prefWidth="80.0" styleClass="button" text="Create" />
+            </children>
+        </HBox>
     </children>
 </VBox>

@@ -28,5 +28,5 @@
         <fx:include source="/pages/custom_title_bar/CustomTitleBar.fxml" StackPane.alignment="TOP_CENTER" />
 
         <fx:include fx:id="playerBar" maxHeight="100.0" source="/pages/player_bar/PlayerBar.fxml" StackPane.alignment="BOTTOM_CENTER" />
-    </children>
-</StackPane>
+         </children>
+ </StackPane>

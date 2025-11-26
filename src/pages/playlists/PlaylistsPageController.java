@@ -9,22 +9,21 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import pages.components.Toast;
 import pages.confirmation_dialog.ConfirmationDialogController;
 import pages.new_playlist_dialog.NewPlaylistDialogController;
 import pages.playlist_songs.PlaylistSongsPageController;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 public class PlaylistsPageController {
 
@@ -35,6 +34,10 @@ public class PlaylistsPageController {
     private void initialize(){
         SqliteDBManager.insertDefaultPlaylist();
         loadPlaylists();
+    }
+
+    public Stage getStage() {
+        return (Stage) rootPane.getScene().getWindow();
     }
 
     @FXML
@@ -60,7 +63,10 @@ public class PlaylistsPageController {
         Stage dialogStage = new Stage();
         dialogStage.initModality(Modality.APPLICATION_MODAL);
         dialogStage.initOwner(rootPane.getScene().getWindow());
-        dialogStage.setScene(new Scene(root));
+        dialogStage.initStyle(StageStyle.TRANSPARENT); // Make stage transparent
+        Scene scene = new Scene(root);
+        scene.setFill(Color.TRANSPARENT); // Make scene transparent
+        dialogStage.setScene(scene);
 
         dialogStage.showAndWait();
     }
@@ -80,6 +86,10 @@ public class PlaylistsPageController {
         playlistRow.getStyleClass().add("row-box");
 
         playlistRow.setOnMouseClicked(e -> {
+            // Prevent click-through to row if delete button is clicked
+            if (e.getTarget() instanceof Button) {
+                return;
+            }
             try {
                 FXMLLoader loader = new FXMLLoader(Main.class.getResource("/pages/playlist_songs/PlaylistSongsPage.fxml"));
                 Parent playlistSongsPage = loader.load();
@@ -132,27 +142,7 @@ public class PlaylistsPageController {
         Button deleteButton = new Button("Delete");
         deleteButton.setOnAction(e -> {
             e.consume(); // Prevent the row's onMouseClicked from firing
-            try {
-                FXMLLoader loader = new FXMLLoader(Main.class.getResource("/pages/confirmation_dialog/ConfirmationDialog.fxml"));
-                Parent root = loader.load();
-                ConfirmationDialogController controller = loader.getController();
-                controller.setMessage("Are you sure you want to delete the playlist: " + playlist.name + "?");
-
-                Stage dialogStage = new Stage();
-                dialogStage.initModality(Modality.APPLICATION_MODAL);
-                dialogStage.initOwner(rootPane.getScene().getWindow());
-                dialogStage.setScene(new Scene(root));
-                controller.setDialogStage(dialogStage);
-
-                dialogStage.showAndWait();
-
-                if (controller.isConfirmed()) {
-                    SqliteDBManager.deletePlaylist(playlist.name);
-                    loadPlaylists();
-                }
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
+            handleDeletePlaylist(playlist);
         });
 
         grid.add(nameText, 0, 0);
@@ -164,6 +154,33 @@ public class PlaylistsPageController {
         HBox.setHgrow(grid, Priority.ALWAYS);
 
         return playlistRow;
+    }
+
+    private void handleDeletePlaylist(SqliteDBManager.PlaylistInfo playlist) {
+        try {
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("/pages/confirmation_dialog/ConfirmationDialog.fxml"));
+            Parent root = loader.load();
+            ConfirmationDialogController controller = loader.getController();
+            controller.setMessage("Are you sure you want to delete the playlist: " + playlist.name + "?");
+
+            Stage dialogStage = new Stage();
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            dialogStage.initOwner(rootPane.getScene().getWindow());
+            dialogStage.initStyle(StageStyle.TRANSPARENT); // Make stage transparent
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT); // Make scene transparent
+            dialogStage.setScene(scene);
+            controller.setDialogStage(dialogStage);
+
+            dialogStage.showAndWait();
+
+            if (controller.isConfirmed()) {
+                SqliteDBManager.deletePlaylist(playlist.name);
+                Toast.show("Playlist deleted", (Stage) rootPane.getScene().getWindow(), this::loadPlaylists);
+            }
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
     }
 
     private String formatDuration(int seconds){

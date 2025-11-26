@@ -35,4 +35,10 @@ public class ConfirmationDialogController {
         confirmed = false;
         dialogStage.close();
     }
+
+    @FXML
+    private void handleCancel() {
+        confirmed = false;
+        dialogStage.close();
+    }
 }

@@ -148,23 +148,51 @@ public class SqliteDBManager {
         return false;
     }
 
-    public static void removeSongFromDB(String path){
-        if(songExists(path)){
-            String sql = "DELETE FROM songs WHERE path = ?";
-            try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, path);
-                int rows = pstmt.executeUpdate();
-                if (rows > 0) {
-                    System.out.println("Song removed from database: " + path);
-                } else {
-                    System.out.println("No song was deleted (unexpected).");
-                }
-            } catch (SQLException e) {
-                System.err.println("Error deleting song: " + e.getMessage());
+    public static void deleteSong(String path) {
+        // First, get the song's ID
+        int songId = -1;
+        String findIdSql = "SELECT id FROM songs WHERE path = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(findIdSql)) {
+            pstmt.setString(1, path);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                songId = rs.getInt("id");
             }
+        } catch (SQLException e) {
+            System.err.println("Error finding song ID for deletion: " + e.getMessage());
+            return; // Exit if we can't find the song
         }
 
+        if (songId == -1) {
+            System.out.println("Song not found in database: " + path);
+            return;
+        }
+
+        // Next, delete from playlist_songs table
+        String deleteFromPlaylistsSql = "DELETE FROM playlist_songs WHERE song_id = ?";
+        try (Connection conn = connectPlaylist();
+             PreparedStatement pstmt = conn.prepareStatement(deleteFromPlaylistsSql)) {
+            pstmt.setInt(1, songId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error deleting song from playlists: " + e.getMessage());
+        }
+
+        // Finally, delete from songs table
+        String deleteFromSongsSql = "DELETE FROM songs WHERE id = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(deleteFromSongsSql)) {
+            pstmt.setInt(1, songId);
+            int rows = pstmt.executeUpdate();
+            if (rows > 0) {
+                System.out.println("Song removed from database: " + path);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error deleting song from main table: " + e.getMessage());
+        }
     }
+
 
     public static void insertNewSong(SongManager.SongInfo song) {
         if (song == null || song.path == null || songExists(song.path)) {
