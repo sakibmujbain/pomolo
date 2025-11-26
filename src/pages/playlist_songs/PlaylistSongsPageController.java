@@ -161,6 +161,7 @@ public class PlaylistSongsPageController {
         grid.add(durationText, 2, 0);
         grid.add(deleteButton, 3, 0);
 
+
         songRow.getChildren().add(grid);
         HBox.setHgrow(grid, Priority.ALWAYS);
 

@@ -12,6 +12,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -343,6 +344,7 @@ public class HomeController {
         grid.setMaxWidth(Double.MAX_VALUE);
         grid.setPrefHeight(30.0);
         grid.setPadding(new Insets(0, 10, 0, 10));
+        grid.setAlignment(Pos.CENTER);
 
         ColumnConstraints col1 = new ColumnConstraints();
         col1.setHalignment(HPos.LEFT);
@@ -356,9 +358,14 @@ public class HomeController {
 
         ColumnConstraints col3 = new ColumnConstraints();
         col3.setHalignment(HPos.RIGHT);
-        col3.setPercentWidth(30);
+        col3.setPercentWidth(25.0);
         col3.setHgrow(Priority.ALWAYS);
-        grid.getColumnConstraints().addAll(col1, col2, col3);
+
+        ColumnConstraints col4 = new ColumnConstraints();
+        col4.setHalignment(HPos.RIGHT);
+        col4.setPercentWidth(5.0);
+        col4.setHgrow(Priority.NEVER);
+        grid.getColumnConstraints().addAll(col1, col2, col3, col4);
 
         String fileName = song.fileName;
         if(fileName.length() > 30){
@@ -376,9 +383,7 @@ public class HomeController {
         durationText.setFill(Color.WHITE);
         durationText.setFont(Font.font("Monospaced", 13));
 
-        grid.add(titleText, 0, 0);
-        grid.add(artistText, 1, 0);
-        grid.add(durationText, 2, 0);
+
 
         // --- DELETE BUTTON ---
         Button deleteButton = new Button();
@@ -389,7 +394,14 @@ public class HomeController {
             e.consume(); // Prevents the row's click event from firing
         });
 
-        songRow.getChildren().addAll(grid, deleteButton);
+        grid.add(titleText, 0, 0);
+        grid.add(artistText, 1, 0);
+        grid.add(durationText, 2, 0);
+        grid.add(deleteButton, 3, 0);
+
+
+
+        songRow.getChildren().addAll(grid);
         HBox.setHgrow(grid, Priority.ALWAYS);
 
         return songRow;
