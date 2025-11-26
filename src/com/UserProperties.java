@@ -72,32 +72,5 @@ public class UserProperties {
         }
     }
 
-    // Fixed aspect ratio settings
-    public void setFixedAspectEnabled(boolean enabled) throws IOException {
-        Properties config = loadProperties();
-        config.setProperty("fixed_aspect_enabled", String.valueOf(enabled));
-        saveConfig(config);
-    }
 
-    public boolean getFixedAspectEnabled() {
-        Properties config = loadProperties();
-        String val = config.getProperty("fixed_aspect_enabled", "false");
-        return Boolean.parseBoolean(val);
-    }
-
-    public void setFixedAspectRatio(double ratio) throws IOException {
-        Properties config = loadProperties();
-        config.setProperty("fixed_aspect_ratio", String.valueOf(ratio));
-        saveConfig(config);
-    }
-
-    public double getFixedAspectRatio() {
-        Properties config = loadProperties();
-        String val = config.getProperty("fixed_aspect_ratio", String.valueOf(4.0/3.0));
-        try {
-            return Double.parseDouble(val);
-        } catch (NumberFormatException e) {
-            return 4.0/3.0;
-        }
-    }
 }

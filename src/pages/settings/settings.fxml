@@ -2,10 +2,8 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -156,36 +154,6 @@
                                     <padding>
                                         <Insets left="10.0" right="10.0" />
                                     </padding>
-                                </GridPane>
-                            </children>
-                        </HBox>
-
-                        <!-- Fixed Aspect Ratio Controls -->
-                        <HBox fx:id="aspectBox" blendMode="SCREEN" prefHeight="60.0" styleClass="row-box" stylesheets="../../css/home.css">
-                            <children>
-                                <GridPane prefHeight="40.0" HBox.hgrow="ALWAYS">
-                                    <columnConstraints>
-                                        <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0" />
-                                        <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0" />
-                                        <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0" />
-                                    </columnConstraints>
-                                    <children>
-                                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Fixed Window Aspect Ratio:" textAlignment="CENTER">
-                                            <font>
-                                                <Font name="Monospaced Regular" size="13.0" />
-                                            </font>
-                                        </Text>
-                                        <CheckBox fx:id="fixedRatioCheckBox" GridPane.columnIndex="1" />
-                                        <HBox spacing="6" GridPane.columnIndex="2">
-                                            <children>
-                                                <Text text="W:" fill="WHITE" />
-                                                <TextField fx:id="aspectWidthField" prefWidth="60" />
-                                                <Text text="H:" fill="WHITE" />
-                                                <TextField fx:id="aspectHeightField" prefWidth="60" />
-                                                <Button text="Apply" onAction="#applyAspectSettings" />
-                                            </children>
-                                        </HBox>
-                                    </children>
                                 </GridPane>
                             </children>
                         </HBox>

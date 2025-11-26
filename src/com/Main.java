@@ -14,15 +14,9 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import pages.root.RootPageController;
-import com.UserProperties;
 
 public class Main extends Application {
     public static RootPageController rootController;
-    private static Stage primaryStage;
-    private static javafx.beans.value.ChangeListener<Number> widthListener;
-    private static javafx.beans.value.ChangeListener<Number> heightListener;
-    private static boolean resizingAdjusting = false;
-    private static double fixedRatio = 16.0 / 9.0;
 
     public static void main(String[] args) {
         launch(args);
@@ -33,7 +27,6 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(Main.class.getResource("/pages/root/rootPage.fxml"));
         Parent root = loader.load();
         rootController = loader.getController();
-        primaryStage = stage;
 
         Scene scene = new Scene(root, 1280, 720);
         scene.getStylesheets().add(Main.class.getResource("/css/home.css").toExternalForm());
@@ -43,19 +36,9 @@ public class Main extends Application {
 
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setTitle("Pomolo");
-        stage.setResizable(true);
+        stage.setResizable(false);
         stage.setScene(scene);
 
-        try {
-            UserProperties up = new UserProperties();
-            boolean enabled = up.getFixedAspectEnabled();
-            double ratio = up.getFixedAspectRatio();
-            if (Double.isNaN(ratio) || ratio <= 0 || ratio < 0.5 || ratio > 3.0) {
-                ratio = 16.0 / 9.0;
-                up.setFixedAspectRatio(ratio);
-            }
-            setFixedAspectRatioEnabled(enabled, ratio);
-        } catch (Exception ignored) {}
 
         stage.show();
 
@@ -144,47 +127,7 @@ public class Main extends Application {
         return rootController;
     }
 
-    public static Stage getPrimaryStage() {
-        return primaryStage;
-    }
 
-    public static void setFixedAspectRatioEnabled(boolean enabled, double ratio) {
-        // ... (Keep existing logic unchanged) ...
-        if (primaryStage == null) return;
-        if (widthListener != null) primaryStage.widthProperty().removeListener(widthListener);
-        if (heightListener != null) primaryStage.heightProperty().removeListener(heightListener);
-        widthListener = null; heightListener = null;
-        fixedRatio = ratio;
-
-        if (!enabled) return;
-
-        widthListener = (obs, old, nw) -> {
-            if (resizingAdjusting) return;
-            try {
-                resizingAdjusting = true;
-                double newWidth = nw.doubleValue();
-                double newHeight = Math.max(100, newWidth / fixedRatio);
-                primaryStage.setHeight(newHeight);
-            } finally {
-                resizingAdjusting = false;
-            }
-        };
-
-        heightListener = (obs, old, nh) -> {
-            if (resizingAdjusting) return;
-            try {
-                resizingAdjusting = true;
-                double newHeight = nh.doubleValue();
-                double newWidth = Math.max(200, newHeight * fixedRatio);
-                primaryStage.setWidth(newWidth);
-            } finally {
-                resizingAdjusting = false;
-            }
-        };
-
-        primaryStage.widthProperty().addListener(widthListener);
-        primaryStage.heightProperty().addListener(heightListener);
-    }
 
     public static void showMiniPlayer(Parent miniRoot) {
         Stage miniStage = new Stage();

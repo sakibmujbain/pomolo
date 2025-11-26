@@ -8,9 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -28,9 +26,6 @@ public class SettingsController {
     @FXML private Slider rainVolumeSlider;
     @FXML private Slider fireplaceVolumeSlider;
     @FXML private Slider windVolumeSlider;
-    @FXML private CheckBox fixedRatioCheckBox;
-    @FXML private TextField aspectWidthField;
-    @FXML private TextField aspectHeightField;
 
     UserProperties up = new UserProperties();
 
@@ -101,29 +96,7 @@ public class SettingsController {
             }
         });
 
-        // Initialize fixed aspect controls
-        boolean fixedEnabled = up.getFixedAspectEnabled();
-        double ratio = up.getFixedAspectRatio();
-        fixedRatioCheckBox.setSelected(fixedEnabled);
-        // populate width/height fields from ratio (use simple 16:9 default conversion)
-        double w = 16.0, h = 9.0;
-        try {
-            double r = ratio;
-            // choose integers with gcd simplification could be added; simply map to 16:9 if default
-            w = Math.round(r * 100.0) / 100.0; // not used for display
-        } catch (Exception ignored) {}
-        // We'll default display to 16 and 9 if ratio roughly equals 16/9
-        if (Math.abs(ratio - (16.0/9.0)) < 0.01) {
-            aspectWidthField.setText("16");
-            aspectHeightField.setText("9");
-        } else {
-            // approximate to integers (width=ratio*100 ???) better: set width=16 and compute height
-            aspectWidthField.setText("16");
-            aspectHeightField.setText(String.valueOf((int) Math.round(16.0 / ratio)));
-        }
 
-        // Apply initial enabling
-        Main.setFixedAspectRatioEnabled(fixedEnabled, ratio);
     }
 
     @FXML
@@ -159,23 +132,7 @@ public class SettingsController {
         }
     }
 
-    @FXML
-    private void applyAspectSettings() {
-        try {
-            boolean enabled = fixedRatioCheckBox.isSelected();
-            int w = Integer.parseInt(aspectWidthField.getText().trim());
-            int h = Integer.parseInt(aspectHeightField.getText().trim());
-            if (w <= 0 || h <= 0) throw new NumberFormatException("Width/Height must be positive");
-            double ratio = (double) w / (double) h;
-            // persist
-            up.setFixedAspectEnabled(enabled);
-            up.setFixedAspectRatio(ratio);
-            // apply
-            Main.setFixedAspectRatioEnabled(enabled, ratio);
-        } catch (NumberFormatException | IOException ex) {
-            showError("Aspect Ratio Error", "Invalid width/height values or could not save settings: " + ex.getMessage());
-        }
-    }
+
 
     private void showError(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

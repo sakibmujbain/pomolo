@@ -139,13 +139,4 @@
     -fx-translate-y: 1px;
 }
 
-/* Resize grip in the bottom-right corner of the root pane */
-.resize-grip {
-    -fx-background-color: rgba(255,255,255,0.08);
-    -fx-background-radius: 6 0 0 0;
-    -fx-border-color: rgba(255,255,255,0.06);
-    -fx-border-width: 1px;
-}
-.resize-grip:hover {
-    -fx-background-color: rgba(255,255,255,0.18);
-}
+

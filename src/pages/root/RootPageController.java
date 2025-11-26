@@ -73,7 +73,7 @@ public class RootPageController {
         setOverlayOpacity(up.getOverlayOpacity());
         pageContainer.prefWidthProperty().bind(root.widthProperty());
         pageContainer.prefHeightProperty().bind(root.heightProperty().subtract(130));
-        setupResizeGrip();
+
         setupDragAndDrop();
     }
 
@@ -203,44 +203,7 @@ public class RootPageController {
     public StackPane getPageContainer() { return pageContainer; }
     public StackPane getRootPane() { return root; }
 
-    private void setupResizeGrip() {
-        if (resizeGrip == null) return;
-        final Delta d = new Delta();
-        final boolean[] resizing = {false};
-        resizeGrip.setMouseTransparent(false);
-        resizeGrip.toFront();
-        resizeGrip.setOnMouseEntered(ev -> {
-            resizeGrip.setOpacity(0.9);
-            resizeGrip.setCursor(javafx.scene.Cursor.SE_RESIZE);
-        });
-        resizeGrip.setOnMouseExited(ev -> {
-            if (!resizing[0]) {
-                resizeGrip.setOpacity(0.12);
-                resizeGrip.setCursor(javafx.scene.Cursor.DEFAULT);
-            }
-        });
-        resizeGrip.setOnMousePressed(ev -> {
-            if (!ev.isPrimaryButtonDown()) return;
-            var stage = (javafx.stage.Stage) root.getScene().getWindow();
-            d.x = stage.getWidth() - ev.getSceneX();
-            d.y = stage.getHeight() - ev.getSceneY();
-            resizing[0] = true;
-            ev.consume();
-        });
-        resizeGrip.setOnMouseDragged(ev -> {
-            if (!resizing[0]) return;
-            var stage = (javafx.stage.Stage) root.getScene().getWindow();
-            stage.setWidth(ev.getSceneX() + d.x);
-            stage.setHeight(ev.getSceneY() + d.y);
-            ev.consume();
-        });
-        resizeGrip.setOnMouseReleased(ev -> {
-            resizing[0] = false;
-            resizeGrip.setOpacity(0.12);
-            resizeGrip.setCursor(javafx.scene.Cursor.DEFAULT);
-            ev.consume();
-        });
-    }
+
 }
 
 class Delta { double x, y; }
