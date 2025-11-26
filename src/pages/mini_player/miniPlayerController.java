@@ -146,9 +146,17 @@ public class miniPlayerController {
 
     private void bindMusicPlayer() {
         var song = musicManager.currentSongProperty().get();
-        if (song != null) songLabel.setText(truncate(song.fileName, 20));
+        if (song != null) {
+            songLabel.setText(truncate(song.fileName, 20));
+        } else {
+            songLabel.setText("No song playing");
+        }
         musicManager.currentSongProperty().addListener((obs, old, val) -> {
-            if (val != null) Platform.runLater(() -> songLabel.setText(truncate(val.fileName, 20)));
+            if (val != null) {
+                Platform.runLater(() -> songLabel.setText(truncate(val.fileName, 20)));
+            } else {
+                Platform.runLater(() -> songLabel.setText("No song playing"));
+            }
         });
         updatePlayPauseIcon();
         musicManager.isPlayingProperty().addListener((obs, was, now) -> {

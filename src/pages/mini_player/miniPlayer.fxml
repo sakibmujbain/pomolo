@@ -28,8 +28,8 @@
 
         <!-- === Pomodoro Progress Ring === -->
         <StackPane fx:id="ringVisualsStack" alignment="CENTER">
-            <Circle fill="transparent" radius="110.0" stroke="#FFFFFF66" strokeWidth="4.0" />
-            <Circle fx:id="timerProgressRing" fill="transparent" radius="110.0" stroke="#FFFFFF" strokeLineCap="ROUND" strokeWidth="10.0" />
+            <Circle fill="transparent" radius="110.0" stroke="#FFFFFF66" strokeWidth="2.0" />
+            <Circle fx:id="timerProgressRing" fill="transparent" radius="110.0" stroke="#FFFFFF" strokeLineCap="ROUND" strokeWidth="6.0" />
         </StackPane>
 
         <!-- === Music Design (shown when not hovered) === -->
@@ -49,7 +49,7 @@
                            styleClass="mini-player-song-label"
                            wrapText="true"
                            textAlignment="CENTER"
-                           maxWidth="200"
+                           maxWidth="Infinity"
                            BorderPane.alignment="CENTER">
                         <BorderPane.margin>
                             <Insets top="60"/>
