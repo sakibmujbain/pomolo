@@ -73,21 +73,15 @@
                 </GridPane>
             </children>
         </HBox>
-        <!-- Left grouped toolbar: Add / Import Folder / Pomodoro / Playlist -->
+        <!-- Left grouped toolbar: Add / Pomodoro / Playlist -->
         <HBox AnchorPane.leftAnchor="75.0" AnchorPane.topAnchor="30.0" spacing="12.0" alignment="CENTER_LEFT">
             <children>
                 <Button mnemonicParsing="false" onAction="#AddNewMusic" styleClass="icon-btn">
                     <graphic>
                         <FontIcon iconLiteral="fas-plus" iconSize="20" styleClass="iconli-font-icon"/>
                     </graphic>
-                </Button>
-
-                <Button mnemonicParsing="false" onAction="#importFolder" styleClass="icon-btn">
-                    <graphic>
-                        <FontIcon iconLiteral="fas-folder-plus" iconSize="20" styleClass="iconli-font-icon"/>
-                    </graphic>
                     <tooltip>
-                        <Tooltip text="Import folder" />
+                        <Tooltip text="Add music from files or folder" />
                     </tooltip>
                 </Button>
 

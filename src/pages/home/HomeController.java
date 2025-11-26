@@ -13,7 +13,11 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.DialogPane;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
@@ -33,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HomeController {
@@ -76,47 +81,74 @@ public class HomeController {
     }
 
     private void processDroppedFiles(List<File> files) {
-        int addedCount = 0;
-        int duplicateCount = 0;
-        List<String> validExtensions = List.of(".mp3", ".wav", ".flac");
+        AtomicInteger addedCount = new AtomicInteger(0);
+        AtomicInteger duplicateCount = new AtomicInteger(0);
 
-        for (File file : files) {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                for (File file : files) {
+                    processFileOrDirectory(file, addedCount, duplicateCount);
+                }
+                return null;
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            Platform.runLater(() -> {
+                Stage stage = (Stage) rootPane.getScene().getWindow();
+                List<String> messages = new ArrayList<>();
+                if (addedCount.get() > 0) {
+                    messages.add(addedCount.get() + (addedCount.get() == 1 ? " new song added" : " new songs added"));
+                }
+                if (duplicateCount.get() > 0) {
+                    messages.add(duplicateCount.get() + (duplicateCount.get() == 1 ? " song already exists" : " songs already exist"));
+                }
+
+                if (!messages.isEmpty()) {
+                    String finalMessage = String.join(". ", messages);
+                    Toast.show(finalMessage, stage, this::loadSongs);
+                }
+
+                if (loadedSongs != null) {
+                    playerManager.setQueue(loadedSongs);
+                }
+            });
+        });
+
+        Thread th = new Thread(task);
+        th.setDaemon(true);
+        th.start();
+    }
+
+    private void processFileOrDirectory(File file, AtomicInteger addedCount, AtomicInteger duplicateCount) {
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    processFileOrDirectory(f, addedCount, duplicateCount);
+                }
+            }
+        } else {
+            List<String> validExtensions = List.of(".mp3", ".wav", ".flac");
             String fileName = file.getName().toLowerCase();
             boolean isValidExtension = validExtensions.stream().anyMatch(fileName::endsWith);
 
             if (isValidExtension) {
                 try {
                     if (SqliteDBManager.songExists(file.getAbsolutePath())) {
-                        duplicateCount++;
+                        duplicateCount.getAndIncrement();
                     } else {
                         SongManager.SongInfo music = SongManager.readMp3(file);
                         if (music != null) {
                             SqliteDBManager.insertNewSong(music);
-                            addedCount++;
+                            addedCount.getAndIncrement();
                         }
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
-        }
-
-        Stage stage = (Stage) rootPane.getScene().getWindow();
-        List<String> messages = new ArrayList<>();
-        if (addedCount > 0) {
-            messages.add(addedCount + (addedCount == 1 ? " new song added" : " new songs added"));
-        }
-        if (duplicateCount > 0) {
-            messages.add(duplicateCount + (duplicateCount == 1 ? " song already exists" : " songs already exist"));
-        }
-
-        if (!messages.isEmpty()) {
-            String finalMessage = String.join(". ", messages);
-            Toast.show(finalMessage, stage, this::loadSongs);
-        }
-
-        if (loadedSongs != null) {
-            playerManager.setQueue(loadedSongs);
         }
     }
 
@@ -146,6 +178,34 @@ public class HomeController {
 
     @FXML
     private void AddNewMusic(){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.initStyle(StageStyle.TRANSPARENT);
+        alert.setHeaderText(null);
+        alert.setGraphic(null);
+        alert.setContentText("Add music from files or a folder?");
+
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
+        dialogPane.getStyleClass().add("root");
+        dialogPane.getScene().setFill(Color.TRANSPARENT);
+
+        ButtonType buttonTypeFiles = new ButtonType("From Files");
+        ButtonType buttonTypeFolder = new ButtonType("From Folder");
+        ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(buttonTypeCancel, buttonTypeFiles, buttonTypeFolder);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent()) {
+            if (result.get() == buttonTypeFiles) {
+                addMusicFromFiles();
+            } else if (result.get() == buttonTypeFolder) {
+                addMusicFromFolder();
+            }
+        }
+    }
+
+    private void addMusicFromFiles() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Music File");
         fileChooser.getExtensionFilters().addAll(
@@ -176,8 +236,7 @@ public class HomeController {
         }
     }
 
-    @FXML
-    private void importFolder() {
+    private void addMusicFromFolder() {
         DirectoryChooser dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Select Folder to Import");
         Stage stage = (Stage) rootPane.getScene().getWindow();
