@@ -92,5 +92,10 @@
                 <FontIcon iconLiteral="fas-list" iconSize="20" styleClass="iconli-font-icon"/>
             </graphic>
         </Button>
+        <Button onAction="#goToDownloads" AnchorPane.leftAnchor="310.0" AnchorPane.topAnchor="30.0" styleClass="icon-btn">
+            <graphic>
+                <FontIcon iconLiteral="fas-download" iconSize="20" styleClass="iconli-font-icon"/>
+            </graphic>
+        </Button>
     </children>
 </AnchorPane>

@@ -49,6 +49,12 @@ public class HomeController {
     }
 
     @FXML
+    public void goToDownloads(ActionEvent e) throws Exception{
+        Parent downloads = FXMLLoader.load(Main.class.getResource("/pages/download/DownloadPage.fxml"));
+        Main.getRootController().setPage(downloads);
+    }
+
+    @FXML
     public void goToPlaylists() throws IOException {
         Parent playlists = FXMLLoader.load(Main.class.getResource("/pages/playlists/playlists.fxml"));
         Main.getRootController().setPage(playlists);
