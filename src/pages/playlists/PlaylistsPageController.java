@@ -160,6 +160,10 @@ public class PlaylistsPageController {
     }
 
     private void handleDeletePlaylist(SqliteDBManager.PlaylistInfo playlist) {
+        if ("liked_songs".equals(playlist.name)) {
+            Toast.show("'liked_songs' can't be deleted", (Stage) rootPane.getScene().getWindow());
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(Main.class.getResource("/pages/confirmation_dialog/ConfirmationDialog.fxml"));
             Parent root = loader.load();
