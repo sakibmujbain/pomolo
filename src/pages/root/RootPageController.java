@@ -24,6 +24,7 @@ import pages.home.HomeController;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -48,17 +49,8 @@ public class RootPageController {
         try {
             Properties settings = up.loadProperties();
             String imagePath = settings.getProperty("background");
-            File img = new File(imagePath);
-            if (!img.exists()) {
-                imagePath = settings.getProperty("default_background");
-                up.SetProperties(imagePath);
-                img = new File(imagePath);
-            }
-            if (img.exists()) {
-                backgroundImage.setImage(new Image(img.toURI().toString()));
-            } else {
-                showError("Image Error", "Could not load background image: " + imagePath);
-            }
+            SetBackgroundImage(imagePath);
+
 
             FXMLLoader loader = new FXMLLoader(Main.class.getResource("/pages/home/home.fxml"));
             Parent home = loader.load();
@@ -205,15 +197,45 @@ public class RootPageController {
     }
 
     public void SetBackgroundImage(String path) {
-        try {
-            File imgFile = new File(path);
-            if (imgFile.exists()) {
-                backgroundImage.setImage(new Image(imgFile.toURI().toString()));
-            } else {
-                showError("Image Error", "Could not find the selected image file: " + path);
+        Image image = null;
+
+        // If the path starts with "/", treat it as a resource within the JAR.
+        if (path != null && path.startsWith("/")) {
+            try (InputStream stream = getClass().getResourceAsStream(path)) {
+                if (stream != null) {
+                    image = new Image(stream);
+                } else {
+                    showError("Resource Error", "Could not load default background resource: " + path);
+                }
+            } catch (IOException e) {
+                showError("Resource Error", "Error reading background resource: " + e.getMessage());
             }
-        } catch (Exception e) {
-            showError("Image Error", "An error occurred while setting the background image: " + e.getMessage());
+        } else {
+            // Otherwise, treat it as an external file path.
+            try {
+                File imgFile = new File(path);
+                if (imgFile.exists()) {
+                    image = new Image(imgFile.toURI().toString());
+                } else {
+                    // Fallback to default if the user-defined file is not found
+                    String defaultPath = new UserProperties().loadProperties().getProperty("default_background");
+                    try (InputStream stream = getClass().getResourceAsStream(defaultPath)) {
+                        if (stream != null) {
+                            image = new Image(stream);
+                        } else {
+                            showError("Image Error", "Could not find the selected image file and could not load the default background.");
+                        }
+                    } catch (IOException e) {
+                        showError("Resource Error", "Error reading default background resource: " + e.getMessage());
+                    }
+                }
+            } catch (Exception e) {
+                showError("Image Error", "An error occurred while setting the background image: " + e.getMessage());
+            }
+        }
+
+        if (image != null) {
+            backgroundImage.setImage(image);
         }
     }
 
