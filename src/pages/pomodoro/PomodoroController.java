@@ -52,11 +52,14 @@ public class PomodoroController {
     private static final int POMODORO_DEFAULT_MINUTES = 0;
     private static int POMODORO_PREV_TIME = 0;
     private static Timeline timeline;
+
+    // --- STATE VARIABLES (Static for global access) ---
     private static boolean isRunning = false, isPaused = false, isPomodoroSession = true, pomodoroModeActive = false;
     private static int editableHours = 0, editableMinutes = POMODORO_DEFAULT_MINUTES, editableSeconds = 0, previousEditableTimeSeconds = 0;
     private static double timeRemaining;
-    private static long startTimeMillis;
     private static int sessionDurationSeconds;
+    private static long targetEndTimeMillis = 0; // The source of truth for time
+
     private static AudioClip ringtone;
     private static final String CONFIG_FILE_NAME = "config.properties";
     private static final String DURATION_KEY = "pomodoro_duration_seconds";
@@ -72,14 +75,11 @@ public class PomodoroController {
     private static boolean animationPlayed = false;
 
     private final PomodoroModel pomodoroModel = PomodoroModel.getInstance();
-
-    // Cache properties in memory
     private Properties cachedProperties = new Properties();
 
     @FXML
     public void initialize() {
-        // --- 1. UI Setup (Instant) ---
-        if(togglePlayPauseButton != null) togglePlayPauseButton.setDisable(true); // Disable play until data loads
+        if(togglePlayPauseButton != null) togglePlayPauseButton.setDisable(true);
 
         if (pomodoroModeActive) {
             editableHours = 0; editableMinutes = 25; editableSeconds = 0;
@@ -91,8 +91,6 @@ public class PomodoroController {
             pomodoroIcon.setIconLiteral("fas-clock");
         }
 
-        boolean wasRunning = isRunning;
-
         if (timerProgressRing != null) {
             final double circumference = 2 * Math.PI * timerProgressRing.getRadius();
             timerProgressRing.getStrokeDashArray().setAll(circumference);
@@ -100,14 +98,11 @@ public class PomodoroController {
             setRingVisible(isRunning || isPaused);
         }
 
-        // --- 2. Background Data Loading ---
         new Thread(() -> {
-            // A. Heavy Disk I/O
             loadPropertiesFromFile();
             boolean saveNeeded = cleanupOldData();
             if (saveNeeded) savePropertiesToFile();
 
-            // --- B. Heavy Audio Loading (Moved to Background) ---
             if (ringtone == null) {
                 try {
                     File audioFile = new File("1_second_tone.mp3");
@@ -120,59 +115,132 @@ public class PomodoroController {
                 }
             }
 
-            // C. Calculations
             int[] dayStats = loadCurrentDayStats();
             int calcMinutes = dayStats[0];
             int calcSessions = dayStats[1];
-
-            // Pre-calculate chart data
             prepareLastSevenDaysData();
 
-            // Load Duration Setting
             int savedDurationSeconds = 0;
             if (editableMinutes == 0 && !isRunning && !isPaused) {
                 savedDurationSeconds = manageDurationPersistence(null);
             }
 
-            // --- 3. Update UI on JavaFX Thread ---
             int finalSavedDuration = savedDurationSeconds;
             Platform.runLater(() -> {
                 currentDayTotalMinutes = calcMinutes;
                 currentDaySessionCount = calcSessions;
                 updateCurrentDayTimeLabel();
-
-                // Draw Chart
                 drawChart();
 
-                // Sync Timer Logic
                 if (editableMinutes == 0 && !isRunning && !isPaused) {
                     editableHours = finalSavedDuration / 3600;
                     editableMinutes = (finalSavedDuration % 3600) / 60;
                     editableSeconds = finalSavedDuration % 60;
                 }
 
-                if (!isRunning && !isPaused) syncEditableTime();
-                else updateTimerLabel((int) Math.ceil(timeRemaining));
+                // Resume logic
+                if (isRunning) {
+                    // Calculate skip
+                    long now = System.currentTimeMillis();
+                    timeRemaining = (targetEndTimeMillis - now) / 1000.0;
+
+                    if (timeRemaining <= 0) {
+                        timeRemaining = 0;
+                        timerFinished();
+                    } else {
+                        startTimer();
+                        playPauseIcon.setIconLiteral("fas-pause");
+                    }
+                } else {
+                    if (!isPaused) syncEditableTime();
+                    else {
+                        updateTimerLabel((int) Math.ceil(timeRemaining));
+                        playPauseIcon.setIconLiteral("fas-play");
+                    }
+                }
 
                 updateTimerRingProgress();
-                updateButtonStates(); // Re-enable buttons
-
-                // Resume timer logic if it was running (recreates the timeline)
-                if (wasRunning) startTimer(timeRemaining);
+                updateButtonStates();
             });
 
         }).start();
     }
 
-    // --- NEW METHOD: Called by RootPageController to stop the ghost timer ---
     public void shutdown() {
         if (timeline != null) {
             timeline.stop();
         }
-        // We DO NOT set isRunning=false, so logic persists in background
+        // Logic continues in background via targetEndTimeMillis
     }
 
-    // --- Helper Methods ---
+    private void startTimer() {
+        if (timeline != null) timeline.stop();
+
+        pomodoroModel.setDurationInSeconds(sessionDurationSeconds);
+
+        timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
+            long now = System.currentTimeMillis();
+            timeRemaining = (targetEndTimeMillis - now) / 1000.0;
+
+            if (timeRemaining <= 0) {
+                timeRemaining = 0;
+                timerFinished();
+            }
+
+            pomodoroModel.setRemainingSeconds(timeRemaining);
+            updateTimerLabel((int) Math.ceil(timeRemaining));
+            updateTimerRingProgress();
+        }));
+
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+    }
+
+    @FXML
+    private void handlePlayPauseToggle(ActionEvent event) {
+        if (isRunning) {
+            stopTimer();
+            updateTimerLabel((int) Math.ceil(timeRemaining));
+            isRunning = false;
+            isPaused = true;
+            playPauseIcon.setIconLiteral("fas-play");
+        } else {
+            if (timeRemaining < 0.1) {
+                if (isPomodoroSession) syncEditableTime();
+                else { timeRemaining = POMODORO_PREV_TIME; sessionDurationSeconds = POMODORO_PREV_TIME; }
+                if (timeRemaining < 1) return;
+            }
+
+            targetEndTimeMillis = System.currentTimeMillis() + (long)(timeRemaining * 1000);
+
+            startTimer();
+            isRunning = true;
+            isPaused = false;
+            playPauseIcon.setIconLiteral("fas-pause");
+        }
+        setRingVisible(true);
+        updateButtonStates();
+    }
+
+    // --- ACCESSORS FOR MINIPLAYER (NEW) ---
+    // These allow the Miniplayer to read the state without the Pomodoro page being active
+
+    public static double getLiveTimeRemaining() {
+        if (!isRunning) return timeRemaining;
+        long now = System.currentTimeMillis();
+        double remaining = (targetEndTimeMillis - now) / 1000.0;
+        return Math.max(0, remaining);
+    }
+
+    public static double getLiveTotalDuration() {
+        return sessionDurationSeconds;
+    }
+
+    public static boolean isTimerActive() {
+        return isRunning || isPaused;
+    }
+
+    // --- Helper Methods (Same as before) ---
 
     private void loadPropertiesFromFile() {
         try (FileInputStream in = new FileInputStream(CONFIG_FILE_NAME)) {
@@ -301,28 +369,6 @@ public class PomodoroController {
     }
 
     @FXML
-    private void handlePlayPauseToggle(ActionEvent event) {
-        if (isRunning) {
-            stopTimer();
-            updateTimerLabel((int) Math.ceil(timeRemaining));
-            isRunning = false; isPaused = true;
-            playPauseIcon.setIconLiteral("fas-play");
-        } else {
-            if (timeRemaining < 0.1) {
-                if (isPomodoroSession) syncEditableTime();
-                else { timeRemaining = POMODORO_PREV_TIME; sessionDurationSeconds = POMODORO_PREV_TIME; }
-                if (timeRemaining < 1) return;
-            }
-            startTimer(timeRemaining);
-            isRunning = true;
-            isPaused = false;
-            playPauseIcon.setIconLiteral("fas-pause");
-        }
-        setRingVisible(true);
-        updateButtonStates();
-    }
-
-    @FXML
     private void handlePomodoro(ActionEvent event) {
         String currentIcon = pomodoroIcon.getIconLiteral();
         if (currentIcon.equals("fas-clock")) {
@@ -344,7 +390,10 @@ public class PomodoroController {
 
     @FXML
     private void handleStop(ActionEvent event) {
-        stopTimer(); isRunning = false; isPaused = false;
+        stopTimer();
+        isRunning = false;
+        isPaused = false;
+
         if (isPomodoroSession) syncEditableTime();
         else {
             timeRemaining = POMODORO_PREV_TIME;
@@ -377,32 +426,15 @@ public class PomodoroController {
         Main.getRootController().setPage(home);
     }
 
-    private void startTimer(double timeRemainingAtStartOfRun) {
-        if (timeline != null) timeline.stop();
-        startTimeMillis = System.currentTimeMillis();
-        pomodoroModel.setDurationInSeconds(sessionDurationSeconds);
-        timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
-            long elapsedMillis = System.currentTimeMillis() - startTimeMillis;
-            double elapsedSeconds = (double) elapsedMillis / 1000.0;
-            timeRemaining = timeRemainingAtStartOfRun - elapsedSeconds;
-            if (timeRemaining <= 0) { timeRemaining = 0; timerFinished(); }
-
-            pomodoroModel.setRemainingSeconds(timeRemaining);
-            updateTimerLabel((int) Math.ceil(timeRemaining));
-            updateTimerRingProgress();
-        }));
-
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
-    }
-
     private void stopTimer() {
         if (timeline != null) timeline.stop();
         pomodoroModel.setRemainingSeconds(timeRemaining);
     }
 
     private void timerFinished() {
-        stopTimer(); isRunning = false; isPaused = false;
+        stopTimer();
+        isRunning = false;
+        isPaused = false;
         pomodoroModel.setRemainingSeconds(0);
         pomodoroModel.setDurationInSeconds(0);
         if (ringtone != null) ringtone.play();

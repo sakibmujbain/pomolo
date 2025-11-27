@@ -17,7 +17,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import models.PomodoroModel;
+import models.PomodoroModel; // We use PomodoroController static methods now, but this import is fine
+import pages.pomodoro.PomodoroController; // IMPORT ADDED
 import org.kordamp.ikonli.javafx.FontIcon;
 import pages.player_bar.AmbientPlayerManager;
 import pages.player_bar.PlayerBarController;
@@ -43,7 +44,7 @@ public class miniPlayerController {
 
     private double xOffset, yOffset;
     private final MusicPlayerManager musicManager = MusicPlayerManager.getInstance();
-    private final PomodoroModel pomodoroModel = PomodoroModel.getInstance();
+    // private final PomodoroModel pomodoroModel = PomodoroModel.getInstance(); // Not needed for the ring anymore
     private final AmbientPlayerManager ambientPlayerManager = PlayerBarController.APM;
     private Timeline glowPulse;
     private AnimationTimer ringAnimationTimer;
@@ -195,11 +196,16 @@ public class miniPlayerController {
         if (timerProgressRing == null) return;
         timerProgressRing.setRotate(-90);
         timerProgressRing.setStrokeLineCap(StrokeLineCap.ROUND);
+
         ringAnimationTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                if (pomodoroModel.getDurationInSeconds() > 0) {
-                    updateTimerProgress(pomodoroModel.getRemainingSeconds(), pomodoroModel.getDurationInSeconds());
+                // FIXED: Use Static Methods from PomodoroController to get live data
+                double total = PomodoroController.getLiveTotalDuration();
+
+                if (total > 0 && PomodoroController.isTimerActive()) {
+                    double remaining = PomodoroController.getLiveTimeRemaining();
+                    updateTimerProgress(remaining, (long) total);
                 } else {
                     ringVisualsStack.setVisible(false);
                 }
@@ -214,7 +220,11 @@ public class miniPlayerController {
             ringVisualsStack.setVisible(false);
             return;
         }
-        ringVisualsStack.setVisible(root.isHover());
+        // Force visible if active, regardless of hover (or keep your hover logic if you prefer)
+        // Your previous code had: ringVisualsStack.setVisible(root.isHover());
+        // If you want it always visible when running:
+        ringVisualsStack.setVisible(true);
+
         double progress = 1.0 - (remainingSeconds / (double) totalDuration);
         if (progress < 0) progress = 0;
         if (progress > 1) progress = 1;
@@ -245,9 +255,12 @@ public class miniPlayerController {
             root.requestFocus();
             animateFade(uiContainer, 1.0);
             animateFade(musicDesign, 0.0);
-            if (pomodoroModel.getDurationInSeconds() > 0) {
+
+            // Only show ring if timer is actually active/paused
+            if (PomodoroController.isTimerActive()) {
                 ringVisualsStack.setVisible(true);
             }
+
             animateScale(root, hoveredScale, animationDuration);
         });
 
@@ -344,6 +357,9 @@ public class miniPlayerController {
     }
 
     @FXML private void restoreMain() {
+        // Stop the local timer loop when closing
+        if (ringAnimationTimer != null) ringAnimationTimer.stop();
+
         Stage miniStage = (Stage) root.getScene().getWindow();
         miniStage.close();
         if (Main.getRootController() != null && Main.getRootController().getRootPane() != null) {
