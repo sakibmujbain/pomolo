@@ -52,6 +52,7 @@ public class PlaylistSongsPageController {
 
     private void loadSongs() {
         playlistSongs = SqliteDBManager.getSongsForPlaylist(playlistName);
+        playerManager.setQueue(playlistSongs);
         vbox.getChildren().clear();
         int index = 0;
         for (SongManager.SongInfo s : playlistSongs) {

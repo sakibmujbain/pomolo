@@ -205,5 +205,3 @@ public class RootPageController {
 
 
 }
-
-class Delta { double x, y; }

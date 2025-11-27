@@ -1,6 +1,7 @@
 package pages.all_songs;
 
 import com.Main;
+import com.MusicPlayerManager;
 import com.SongManager;
 import com.SqliteDBManager;
 import javafx.application.Platform;
@@ -34,6 +35,8 @@ public class AllSongsPageController {
     private List<SongManager.SongInfo> allSongs;
     private List<SongManager.SongInfo> existingSongs;
     private final List<CheckBox> checkBoxes = new ArrayList<>();
+    private MusicPlayerManager playerManager;
+
 
     public void setPlaylistName(String playlistName) {
         this.playlistName = playlistName;
@@ -46,6 +49,9 @@ public class AllSongsPageController {
     public void loadSongs() {
         vbox.getChildren().clear();
         checkBoxes.clear();
+        playerManager = MusicPlayerManager.getInstance();
+        allSongs = SqliteDBManager.getAllSongs();
+        playerManager.setQueue(allSongs);
         populateSongs();
     }
 
