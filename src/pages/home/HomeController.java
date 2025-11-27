@@ -156,7 +156,9 @@ public class HomeController {
 
     @FXML
     public void goToDownloads(ActionEvent e) throws Exception{
-        Parent downloads = FXMLLoader.load(Main.class.getResource("/pages/download/DownloadPage.fxml"));
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource("/pages/download/DownloadPage.fxml"));
+        Parent downloads = loader.load();
+        downloads.getProperties().put("controller", loader.getController());
         Main.getRootController().setPage(downloads);
     }
 

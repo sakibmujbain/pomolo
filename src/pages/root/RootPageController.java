@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import pages.all_songs.AllSongsPageController;
+import pages.download.DownloadPageController;
 import pages.home.HomeController;
 
 import java.io.File;
@@ -159,6 +160,12 @@ public class RootPageController {
             enableDragAndDrop();
         } else {
             disableDragAndDrop();
+        }
+
+        if (controller instanceof DownloadPageController) {
+            Main.setFocusHandlerActive(false);
+        } else {
+            Main.setFocusHandlerActive(true);
         }
         
         Parent currentPage = pageContainer.getChildren().isEmpty() ? null : (Parent) pageContainer.getChildren().getFirst();
