@@ -39,6 +39,7 @@ public class RootPageController {
 
     @FXML
     private void initialize() {
+        SqliteDBManager.verifyAndCleanSongDatabase();
         root.setOpacity(0.0);
 
         try {
