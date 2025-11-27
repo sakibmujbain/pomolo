@@ -142,7 +142,7 @@ public class RootPageController {
         root.getStyleClass().remove("drag-over");
     }
 
-    private void refreshCurrentPage() {
+    public void refreshCurrentPage() {
         if (pageContainer.getChildren().isEmpty()) return;
 
         Parent currentPage = (Parent) pageContainer.getChildren().getFirst();

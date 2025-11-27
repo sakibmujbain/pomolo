@@ -2,6 +2,8 @@ package pages.download;
 
 import com.Main;
 import com.DownloadManager;
+import com.SongManager;
+import com.SqliteDBManager;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -11,6 +13,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
+import java.io.File;
 import java.io.IOException;
 
 public class DownloadPageController {
@@ -27,12 +30,39 @@ public class DownloadPageController {
         // Run download in separate thread to avoid blocking UI
         new Thread(() -> {
             try {
-                DownloadManager.downloadAudio(
+                String downloadPath = "downloads";
+                File downloadDir = new File(downloadPath);
+                if (!downloadDir.exists()) {
+                    downloadDir.mkdirs();
+                }
+
+                String downloadedFilePath = DownloadManager.downloadAudio(
                         linkInput.getText(),
-                        "",
+                        downloadPath,
                         line -> Platform.runLater(() -> terminalOutput.appendText(line))
                 );
-                Platform.runLater(() -> terminalOutput.appendText("\nDownload completed successfully!\n"));
+
+                Platform.runLater(() -> terminalOutput.appendText("\nDownload completed successfully!\nImporting to library..."));
+
+                // Import into library
+                File mp3File = new File(downloadedFilePath);
+                if (mp3File.exists()) {
+                    SongManager.SongInfo songInfo = SongManager.readMp3(mp3File);
+                    if (songInfo != null) {
+                        try {
+                            SqliteDBManager.insertNewSong(songInfo);
+                            Platform.runLater(() -> {
+                                terminalOutput.appendText("\nImported: " + songInfo.fileName);
+                                Main.getRootController().refreshCurrentPage();
+                            });
+                        } catch (Exception ex) {
+                            Platform.runLater(() -> terminalOutput.appendText("\nFailed to import: " + mp3File.getName()));
+                        }
+                    }
+                }
+                Platform.runLater(() -> terminalOutput.appendText("\nLibrary import finished.\n"));
+
+
             } catch (Exception ex) {
                 Platform.runLater(() -> {
                     terminalOutput.appendText("\nError: " + ex.getMessage() + "\n");
