@@ -16,8 +16,8 @@ public class UserProperties {
 
     public Properties loadProperties(){
         Properties config = new Properties();
-        String bg_image = "Background.jpg"; //By default
-        String default_opacity = "0.0"; //Default Opacity
+        String bg_image = "images/background.jpg"; //By default
+        String default_opacity = "60.0"; //Default Opacity
         String default_width = "960";
         String default_height = "540";
 

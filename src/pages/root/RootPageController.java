@@ -53,7 +53,9 @@ public class RootPageController {
             if (img.exists()) {
                 backgroundImage.setImage(new Image(img.toURI().toString()));
             } else {
-                showError("Image Error", "Could not load background image: " + imagePath);
+                // Set default image
+                backgroundImage.setImage(new Image(getClass().getResource("/images/background.jpg").toExternalForm()));
+                //showError("Image Error", "Could not load background image: " + imagePath);
             }
 
             FXMLLoader loader = new FXMLLoader(Main.class.getResource("/pages/home/home.fxml"));
@@ -181,7 +183,9 @@ public class RootPageController {
             if (imgFile.exists()) {
                 backgroundImage.setImage(new Image(imgFile.toURI().toString()));
             } else {
-                showError("Image Error", "Could not find the selected image file: " + path);
+                // Set default image
+                backgroundImage.setImage(new Image(getClass().getResource("/images/background.jpg").toExternalForm()));
+                //showError("Image Error", "Could not find the selected image file: " + path);
             }
         } catch (Exception e) {
             showError("Image Error", "An error occurred while setting the background image: " + e.getMessage());
@@ -206,4 +210,3 @@ public class RootPageController {
 
 }
 
-class Delta { double x, y; }

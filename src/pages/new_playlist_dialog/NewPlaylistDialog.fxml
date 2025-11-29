@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="10.0" styleClass="root" stylesheets="@../../css/dark-theme.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pages.new_playlist_dialog.NewPlaylistDialogController">
+<VBox alignment="CENTER" spacing="10.0" styleClass="root" stylesheets="@../../css/dark-theme.css" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="pages.new_playlist_dialog.NewPlaylistDialogController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>

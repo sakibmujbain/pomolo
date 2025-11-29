@@ -19,7 +19,7 @@
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-<AnchorPane fx:id="rootPane" prefHeight="540.0" prefWidth="960.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pages.pomodoro.PomodoroController">
+<AnchorPane fx:id="rootPane" prefHeight="540.0" prefWidth="960.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="pages.pomodoro.PomodoroController">
     <stylesheets>
         <URL value="@../../css/home.css" />
     </stylesheets>

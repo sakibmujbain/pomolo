@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Text?>
 
-<ToolBar fx:id="toolBar" prefHeight="30.0" styleClass="custom-title-bar" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pages.custom_title_bar.CustomTitleBarController">
+<ToolBar fx:id="toolBar" prefHeight="30.0" styleClass="custom-title-bar" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="pages.custom_title_bar.CustomTitleBarController">
     <items>
         <Text fill="white" text="Pomolo" />
         <HBox HBox.hgrow="ALWAYS" />

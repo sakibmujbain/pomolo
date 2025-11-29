@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="20.0" styleClass="root" stylesheets="@../../css/dark-theme.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pages.confirmation_dialog.ConfirmationDialogController">
+<VBox alignment="CENTER" spacing="20.0" styleClass="root" stylesheets="@../../css/dark-theme.css" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="pages.confirmation_dialog.ConfirmationDialogController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
