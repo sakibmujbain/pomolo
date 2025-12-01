@@ -62,7 +62,7 @@ public class SettingsController {
         windowWidthSlider.setMax(Screen.getPrimary().getVisualBounds().getWidth());
         // If height > width: then height might end before we reach width. So, we should clamp it
         // Max width will be determined by the available height in screen
-        if(up.getWindowHeight() > up.getWindowWidth()){
+        if(aspect_ratio < Screen.getPrimary().getVisualBounds().getWidth() / Screen.getPrimary().getVisualBounds().getHeight()){
             double max_width = aspect_ratio * Screen.getPrimary().getVisualBounds().getHeight();
             windowWidthSlider.setMax(max_width);
         }
@@ -151,10 +151,27 @@ public class SettingsController {
                 BufferedImage img = ImageIO.read(new File(imagePath));
                 changeAspectRatio(img.getWidth(), img.getHeight());
 
-                // Write Aspect Ratio in UserProperties
-                up.setWindowWidth(img.getWidth());
-                up.setWindowHeight(img.getHeight());
+                // when user sets a new image keep the same aspect ratio
+                // Keep either the height or the width same
+                if(img.getWidth() >= img.getHeight()){
+                    up.setWindowHeight(up.getWindowWidth() / aspect_ratio);
+                }else{
+                    up.setWindowWidth(up.getWindowHeight() * aspect_ratio);
+                }
                 changeAspectRatio(up.getWindowWidth(), up.getWindowHeight());
+
+                // Set slider max-min
+                // Set the maximum width/height so that it does no get out
+                windowWidthSlider.setMax(Screen.getPrimary().getVisualBounds().getWidth());
+                // If height > width: then height might end before we reach width. So, we should clamp it
+                // Max width will be determined by the available height in screen
+                if(aspect_ratio < Screen.getPrimary().getVisualBounds().getWidth() / Screen.getPrimary().getVisualBounds().getHeight()){
+                    double max_width = aspect_ratio * Screen.getPrimary().getVisualBounds().getHeight();
+                    windowWidthSlider.setMax(max_width);
+                }
+
+                // Change window width
+                Main.changeWindowWidth(up.getWindowWidth(), aspect_ratio);
 
             } catch (IOException e) {
                 showError("Properties Error", "Could not save new background image setting: " + e.getMessage());

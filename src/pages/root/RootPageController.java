@@ -17,6 +17,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Screen;
 import javafx.util.Duration;
 import pages.all_songs.AllSongsPageController;
 import pages.download.DownloadPageController;
@@ -57,13 +58,10 @@ public class RootPageController {
                 up.SetProperties(imagePath);
                 img = new File(imagePath);
             }
-            if (img.exists()) {
-                backgroundImage.setImage(new Image(img.toURI().toString()));
-            } else {
-                // Set default image
-                backgroundImage.setImage(new Image(getClass().getResource("/images/background.jpg").toExternalForm()));
-                //showError("Image Error", "Could not load background image: " + imagePath);
-            }
+
+            // SetBackgroundImage automatically check if image exists or not so just set it
+            // It will take care of rest
+            SetBackgroundImage(imagePath);
 
             FXMLLoader loader = new FXMLLoader(Main.class.getResource("/pages/home/home.fxml"));
             Parent home = loader.load();
@@ -73,6 +71,26 @@ public class RootPageController {
         } catch (Exception e) {
             e.printStackTrace();
             showError("Application Error", "An unexpected error occurred during initialization: " + e.getMessage());
+        }
+
+        // In case we ever see more than screen bounds width and height
+        double aspect_ratio = up.getWindowWidth() / up.getWindowHeight();
+        // check if width or height is larger than screen width or height. If so, clamp it
+        if(up.getWindowWidth() > Screen.getPrimary().getVisualBounds().getWidth()){
+            try {
+                up.setWindowWidth(960.0);
+                up.setWindowHeight(960.0 / aspect_ratio);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if(up.getWindowHeight() > Screen.getPrimary().getVisualBounds().getHeight()){
+            try {
+                up.setWindowHeight(540.0);
+                up.setWindowWidth(540.0 * aspect_ratio);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         backgroundImage.fitWidthProperty().bind(root.widthProperty());
@@ -222,6 +240,11 @@ public class RootPageController {
             } else {
                 // Set default image
                 backgroundImage.setImage(new Image(getClass().getResource("/images/background.jpg").toExternalForm()));
+                // Set the default size at start
+                if((up.getWindowWidth() / up.getWindowHeight()) != (960.0 / 540.0)) {
+                    up.setWindowWidth(960.0);
+                    up.setWindowHeight(540.0);
+                }
                 //showError("Image Error", "Could not find the selected image file: " + path);
             }
         } catch (Exception e) {

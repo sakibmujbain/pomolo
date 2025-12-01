@@ -17,7 +17,7 @@ public class UserProperties {
     public Properties loadProperties(){
         Properties config = new Properties();
         String bg_image = "images/background.jpg"; //By default
-        String default_opacity = "60.0"; //Default Opacity
+        String default_opacity = "0.6"; //Default Opacity
         String default_width = "960";
         String default_height = "540";
         String default_ytdlp_location = "yt_dlp";
@@ -89,11 +89,11 @@ public class UserProperties {
     // Get Opacity
     public double getOverlayOpacity(){
         Properties config = loadProperties();
-        String val = config.getProperty("overlay_opacity", "0.0");
+        String val = config.getProperty("overlay_opacity", "0.6");
         try{
             return Double.parseDouble(val);
         } catch (NumberFormatException e){
-            return 0.0;
+            return 0.6;
         }
     }
 
