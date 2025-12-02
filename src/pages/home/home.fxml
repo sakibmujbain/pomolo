@@ -23,10 +23,12 @@
                 </font>
             </Text>
         </HBox>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="300.0"
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER"
                     AnchorPane.leftAnchor="35.0"
                     AnchorPane.rightAnchor="35.0"
-                    AnchorPane.topAnchor="159.0">
+                    AnchorPane.topAnchor="159.0"
+                    AnchorPane.bottomAnchor="60.0"
+        >
             <content>
                 <VBox fx:id="vbox" prefHeight="0.0" prefWidth="892.0">
                     <padding>
