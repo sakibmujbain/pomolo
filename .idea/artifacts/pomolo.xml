@@ -1,0 +1,21 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="pomolo">
+    <output-path>$PROJECT_DIR$/out/artifacts/pomolo</output-path>
+    <root id="archive" name="firstFX.jar">
+      <element id="module-output" name="firstFX" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/kordamp/ikonli/ikonli-core/12.4.0/ikonli-core-12.4.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../javafx/openjfx-21.0.9_windows-x64_bin-sdk/javafx-sdk-21.0.9/lib/javafx-swt.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../javafx/openjfx-21.0.9_windows-x64_bin-sdk/javafx-sdk-21.0.9/lib/javafx.web.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../javafx/openjfx-21.0.9_windows-x64_bin-sdk/javafx-sdk-21.0.9/lib/javafx.base.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../javafx/openjfx-21.0.9_windows-x64_bin-sdk/javafx-sdk-21.0.9/lib/javafx.fxml.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../javafx/openjfx-21.0.9_windows-x64_bin-sdk/javafx-sdk-21.0.9/lib/javafx.media.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../javafx/openjfx-21.0.9_windows-x64_bin-sdk/javafx-sdk-21.0.9/lib/javafx.swing.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../javafx/openjfx-21.0.9_windows-x64_bin-sdk/javafx-sdk-21.0.9/lib/javafx.controls.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../javafx/openjfx-21.0.9_windows-x64_bin-sdk/javafx-sdk-21.0.9/lib/javafx.graphics.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/sqlite-jdbc-3.50.3.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/kordamp/ikonli/ikonli-fontawesome5-pack/12.4.0/ikonli-fontawesome5-pack-12.4.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/kordamp/ikonli/ikonli-javafx/12.4.0/ikonli-javafx-12.4.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jaudiotagger-2.0.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

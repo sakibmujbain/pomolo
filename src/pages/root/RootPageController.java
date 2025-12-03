@@ -104,7 +104,7 @@ public class RootPageController {
         enableDragAndDrop();
     }
 
-    private void enableDragAndDrop() {
+    public void enableDragAndDrop() {
         final String dragOverStyle = "drag-over";
 
         root.setOnDragOver(event -> {
@@ -167,7 +167,7 @@ public class RootPageController {
         });
     }
 
-    private void disableDragAndDrop() {
+    public void disableDragAndDrop() {
         root.setOnDragOver(null);
         root.setOnDragExited(null);
         root.setOnDragDropped(null);

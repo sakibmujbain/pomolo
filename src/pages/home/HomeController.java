@@ -4,7 +4,9 @@ import com.Main;
 import com.MusicPlayerManager;
 import com.SongManager;
 import com.SqliteDBManager;
+import javafx.animation.*;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -23,9 +25,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.*;
+import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import pages.components.Toast;
 import pages.confirmation_dialog.ConfirmationDialogController;
+import pages.root.RootPageController;
 
 import java.io.File;
 import java.io.IOException;
@@ -456,5 +460,131 @@ public class HomeController {
         }else{
             return String.format("%02d min %02d s", m, s);
         }
+    }
+
+    // Search Functionality
+    @FXML private HBox headingHBox;
+    @FXML private TextField searchTextField;
+    @FXML private Button searchBtn;
+    @FXML private FontIcon searchBtnIcon;
+
+    private ChangeListener<String> searchListener;
+    private double maxSearchWidth = 300;
+    private String currentSearchQuery = "";
+    //private final RootPageController rootPageController = Main.getRootController();
+
+    @FXML
+    public  void searchMusic(){
+        // Fade out heading
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(300), headingHBox);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0.0);
+        fadeOut.setOnFinished(e -> {
+            headingHBox.setVisible(false);
+            headingHBox.setManaged(false);
+        });
+
+        // Disable draganddrop feature
+        Main.getRootController().disableDragAndDrop();
+
+        // Show and enable search field
+        searchTextField.setVisible(true);
+        searchTextField.setManaged(true);
+        searchTextField.setPrefWidth(0);
+
+        // Animate width growth
+        Timeline widthAnimation = new Timeline(
+                new KeyFrame(Duration.millis(300),
+                        new KeyValue(searchTextField.prefWidthProperty(), maxSearchWidth)
+                )
+        );
+
+        // Run animations in parallel
+        ParallelTransition parallel = new ParallelTransition(fadeOut, widthAnimation);
+        parallel.play();
+
+        // Remove old listener if exists
+        if (searchListener != null) {
+            searchTextField.textProperty().removeListener(searchListener);
+        }
+
+        // Create and add new listener
+        searchListener = (obs, oldVal, newVal) -> searchSongs(newVal);
+        searchTextField.textProperty().addListener(searchListener);
+
+        searchBtnIcon.setIconLiteral("fas-times-circle");
+
+        // Change button action to cancelSearch
+        searchBtn.setOnAction(e -> cancelSearch());
+
+        // Focus on search field automatically
+        searchTextField.requestFocus();
+    }
+
+    @FXML
+    public void cancelSearch(){
+        // Remove listener
+        if (searchListener != null) {
+            searchTextField.textProperty().removeListener(searchListener);
+            searchListener = null;
+        }
+
+        // Clear search
+        searchTextField.clear();
+        clearSearch();
+
+        // Enable draganddrop feature
+        Main.getRootController().enableDragAndDrop();
+
+        // Animate width shrinking
+        Timeline widthAnimation = new Timeline(
+                new KeyFrame(Duration.millis(300),
+                        new KeyValue(searchTextField.prefWidthProperty(), 0)
+                )
+        );
+        widthAnimation.setOnFinished(e -> {
+            // Hide and disable search field
+            searchTextField.setVisible(false);
+            searchTextField.setManaged(false);
+        });
+
+        // Fade in heading
+        headingHBox.setVisible(true);
+        headingHBox.setManaged(true);
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(300), headingHBox);
+        fadeIn.setFromValue(0.0);
+        fadeIn.setToValue(1.0);
+
+        // Run animations in parallel
+        ParallelTransition parallel = new ParallelTransition(widthAnimation, fadeIn);
+        parallel.play();
+
+
+        // Change icon back
+        searchBtnIcon.setIconLiteral("fas-search"); // or whatever your original icon was
+        // Change button action back to searchMusic
+        searchBtn.setOnAction(e -> searchMusic());
+    }
+
+    public void searchSongs(String query) {
+        currentSearchQuery = query.toLowerCase().trim();
+        vbox.getChildren().clear();
+
+        int index = 0;
+        for (SongManager.SongInfo s : loadedSongs) {
+            // Check if song matches search query
+            if (currentSearchQuery.isEmpty() ||
+                    s.fileName.toLowerCase().contains(currentSearchQuery) ||
+                    s.artist.toLowerCase().contains(currentSearchQuery)) {
+
+                vbox.getChildren().add(createSongRow(s, index));
+            }
+            index++;
+        }
+    }
+
+    public void clearSearch() {
+        currentSearchQuery = "";
+        loadSongs(); // Show all songs again
     }
 }

@@ -14,9 +14,10 @@
 <?import javafx.scene.control.Tooltip?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
+<?import javafx.scene.control.TextField?>
 <AnchorPane fx:id="rootPane" prefHeight="540.0" prefWidth="960.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="pages.home.HomeController">
     <children>
-        <HBox alignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+        <HBox fx:id="headingHBox" alignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
             <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="MUSIC" textAlignment="CENTER">
                 <font>
                     <Font name="Monospaced Regular" size="25.0" />
@@ -85,7 +86,7 @@
             </children>
         </HBox>
         <!-- Left grouped toolbar: Add / Pomodoro / Playlist -->
-        <HBox AnchorPane.leftAnchor="75.0" AnchorPane.topAnchor="30.0" spacing="12.0" alignment="CENTER_LEFT">
+        <HBox AnchorPane.leftAnchor="35.0" AnchorPane.topAnchor="30.0" spacing="12.0" alignment="CENTER_LEFT">
             <children>
                 <Button mnemonicParsing="false" onAction="#AddNewMusic" styleClass="icon-btn">
                     <graphic>
@@ -113,6 +114,14 @@
                         <FontIcon iconLiteral="fas-download" iconSize="20" styleClass="iconli-font-icon"/>
                     </graphic>
                 </Button>
+
+                <Button fx:id="searchBtn" onAction="#searchMusic" AnchorPane.leftAnchor="340.0" AnchorPane.topAnchor="30.0" styleClass="icon-btn">
+                    <graphic>
+                        <FontIcon fx:id="searchBtnIcon" iconLiteral="fas-search" iconSize="20" styleClass="iconli-font-icon"/>
+                    </graphic>
+                </Button>
+
+                <TextField fx:id="searchTextField" prefWidth="100" prefHeight="35" promptText="Search" visible="false" managed="false" styleClass="search-input"/>
             </children>
         </HBox>
 
