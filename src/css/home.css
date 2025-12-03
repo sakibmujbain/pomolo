@@ -61,6 +61,23 @@
     -fx-fill: black; /* Makes text black on hover */
 }
 
+/* --- NEW: VISUAL STYLE FOR CURRENTLY PLAYING SONG (Matches Hover) --- */
+.row-box-playing {
+    -fx-background-color: white;
+}
+
+.row-box-playing Text {
+    -fx-fill: black;
+}
+
+/* Fix delete button icon color when row is white */
+.row-box-playing .delete-btn .ikonli-font-icon {
+    -fx-icon-color: #888888;
+}
+.row-box-playing .delete-btn:hover .ikonli-font-icon {
+    -fx-icon-color: #FF6347;
+}
+
 /* --- row-box slider CSS for settings page  --- */
 .row-box .slider {
     -fx-cursor: hand;
@@ -393,8 +410,3 @@
      -fx-border-width: 2px;
      -border-color: white;
 }
-
-
-
-
-

@@ -5,6 +5,8 @@ import com.MusicPlayerManager;
 import com.SongManager;
 import com.SqliteDBManager;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener; // IMPORT ADDED
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
@@ -78,6 +80,30 @@ public class PlaylistSongsPageController {
         songRow.setPrefHeight(40.0);
         songRow.setMaxWidth(Double.MAX_VALUE);
         songRow.getStyleClass().add("row-box");
+
+        // --- Active Song Highlight Logic ---
+        ChangeListener<SongManager.SongInfo> listener = (obs, oldVal, newVal) -> {
+            if (newVal != null && newVal.path.equals(song.path)) {
+                if (!songRow.getStyleClass().contains("row-box-playing")) {
+                    songRow.getStyleClass().add("row-box-playing");
+                }
+            } else {
+                songRow.getStyleClass().remove("row-box-playing");
+            }
+        };
+
+        // Prevent premature GC of the listener
+        songRow.getProperties().put("activeListener", listener);
+        // Use WeakChangeListener to prevent memory leaks in MusicPlayerManager
+        playerManager.currentSongProperty().addListener(new WeakChangeListener<>(listener));
+
+        // Initial State Check
+        SongManager.SongInfo current = playerManager.currentSongProperty().get();
+        if (current != null && current.path.equals(song.path)) {
+            songRow.getStyleClass().add("row-box-playing");
+        }
+        // --- End Highlight Logic ---
+
 
         songRow.setOnMouseClicked(e -> {
             if (e.getTarget() instanceof Button) {

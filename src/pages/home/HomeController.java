@@ -7,6 +7,7 @@ import com.SqliteDBManager;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener; // IMPORT ADDED
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -347,6 +348,30 @@ public class HomeController {
         songRow.setMaxWidth(Double.MAX_VALUE);
         songRow.getStyleClass().add("row-box");
         songRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        // --- Active Song Highlight Logic ---
+        ChangeListener<SongManager.SongInfo> listener = (obs, oldVal, newVal) -> {
+            if (newVal != null && newVal.path.equals(song.path)) {
+                if (!songRow.getStyleClass().contains("row-box-playing")) {
+                    songRow.getStyleClass().add("row-box-playing");
+                }
+            } else {
+                songRow.getStyleClass().remove("row-box-playing");
+            }
+        };
+
+        // Prevent premature GC of the listener
+        songRow.getProperties().put("activeListener", listener);
+        // Use WeakChangeListener to prevent memory leaks in MusicPlayerManager
+        playerManager.currentSongProperty().addListener(new WeakChangeListener<>(listener));
+
+        // Initial State Check
+        SongManager.SongInfo current = playerManager.currentSongProperty().get();
+        if (current != null && current.path.equals(song.path)) {
+            songRow.getStyleClass().add("row-box-playing");
+        }
+        // --- End Highlight Logic ---
+
 
         // Play song on click, but not if the delete button was the source
         songRow.setOnMouseClicked(e -> {
