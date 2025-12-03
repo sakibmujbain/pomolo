@@ -401,7 +401,7 @@
     -fx-border-color: black;
 }
 
-// Search
+// Search Bar Input
 
 .search-input{
      -fx-control-inner-background: transparent;
