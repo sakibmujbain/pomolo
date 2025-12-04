@@ -97,6 +97,29 @@
 
 
 
+.row-box-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: white;
+    -fx-text-fill: white;
+}
+
+.row-box:hover .row-box-btn {
+    -fx-border-color: black;
+    -fx-text-fill: black;
+}
+
+.row-box:hover .row-box-btn:hover{
+    -fx-background-color: black;
+    -fx-border-color: white;
+    -fx-text-fill: white;
+}
+
+
+
+
+
+
+
 /* ---
 --- PLAYER PAGE STYLES
 --- */
@@ -395,7 +418,7 @@
     -fx-border-color: white;
 }
 
-.download-terminal:hover {
+.row-box:hover .download-terminal{
     -fx-text-fill: black;
     -fx-border-width: 2px;
     -fx-border-color: black;
@@ -409,4 +432,17 @@
      -fx-text-fill: white;
      -fx-border-width: 2px;
      -fx-border-color: white;
+}
+
+.download-input {
+     -fx-control-inner-background: transparent;
+     -fx-background-color: transparent;
+     -fx-text-fill: white;
+     -fx-border-width: 1px;
+     -fx-border-color: white;
+}
+
+.row-box:hover .download-input {
+     -fx-border-color: black;
+     -fx-text-fill: black;
 }

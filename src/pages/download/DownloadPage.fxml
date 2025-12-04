@@ -74,7 +74,7 @@
                                 </font>
                             </Text>
                             <TextField fx:id="yt_dlp_location" prefWidth="400" promptText="Enter yt-dlp location" styleClass="download-input" HBox.hgrow="ALWAYS"/>
-                            <Button mnemonicParsing="false" text="Enter" onAction="#setYtDlpLocation"/>
+                            <Button mnemonicParsing="false" text="Enter" onAction="#setYtDlpLocation" styleClass="row-box-btn"/>
                         </children>
                     </HBox>
 
@@ -86,7 +86,7 @@
                                 </font>
                             </Text>
                             <TextField fx:id="ffmpeg_location" prefWidth="400" promptText="Enter ffmpeg location" styleClass="download-input" HBox.hgrow="ALWAYS"/>
-                            <Button mnemonicParsing="false" text="Enter" onAction="#setFfmpegLocation"/>
+                            <Button mnemonicParsing="false" text="Enter" onAction="#setFfmpegLocation" styleClass="row-box-btn"/>
                         </children>
                     </HBox>
 
@@ -98,7 +98,7 @@
                                 </font>
                             </Text>
                             <TextField fx:id="download_location" prefWidth="400" promptText="Enter output location" styleClass="download-input" HBox.hgrow="ALWAYS"/>
-                            <Button mnemonicParsing="false" text="Enter" onAction="#setDownloadLocation"/>
+                            <Button mnemonicParsing="false" text="Enter" onAction="#setDownloadLocation" styleClass="row-box-btn"/>
                         </children>
                     </HBox>
                 </VBox>
@@ -115,7 +115,7 @@
                         <HBox.margin>
                            <Insets left="10.0" />
                         </HBox.margin></TextField>
-                     <Button mnemonicParsing="false" text="Download" onAction="#download">
+                     <Button mnemonicParsing="false" text="Download" onAction="#download" styleClass="row-box-btn">
                         <HBox.margin>
                            <Insets left="10.0" />
                         </HBox.margin>
